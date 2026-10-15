@@ -74,10 +74,11 @@ export function createExecutors(deps: ExecutorDeps): Record<string, Executor> {
       const commands = (task.params.commands as CheckCommand[] | undefined) ?? [];
       if (commands.length === 0) return { ok: false, retryable: false, error: "no commands configured" };
       const runner = new CommandRunner({ projectRoot: project.workDir });
-      // The latest result is kept under the task id; every attempt also gets its own file so failed runs stay on record after a repair.
+      // The latest result is kept under the task id; every attempt also gets its own timestamped file, so failed runs stay on
+      // record after a repair and are never overwritten (reopening a task resets the attempt counter, so the counter alone is not unique).
       const record = (payload: unknown): string[] => [
         writeEvidence(project, task.id, payload),
-        writeEvidence(project, `${task.id}.attempt-${task.retryCount + 1}`, payload),
+        writeEvidence(project, `${task.id}.${new Date().toISOString().replace(/[:.]/g, "-")}.attempt-${task.retryCount + 1}`, payload),
       ];
       const results: { name: string; command: string; code: number | null; durationMs: number; timedOut: boolean; output: string }[] = [];
       for (const c of commands) {

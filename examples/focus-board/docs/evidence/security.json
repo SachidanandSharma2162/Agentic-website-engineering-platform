@@ -1,12 +1,13 @@
 {
   "task": "security",
-  "at": "2026-10-15T17:33:08.155Z",
+  "attempt": 1,
+  "at": "2026-10-15T17:43:24.139Z",
   "results": [
     {
       "name": "npm-audit-high",
       "command": "npm audit --audit-level=high",
       "code": 0,
-      "durationMs": 1767,
+      "durationMs": 2328,
       "timedOut": false,
       "output": "found 0 vulnerabilities"
     }

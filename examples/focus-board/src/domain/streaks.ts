@@ -22,7 +22,7 @@ export function bestStreak(checkIns: Iterable<DayKey>): number {
   let run = 0;
   let prev: DayKey | null = null;
   for (const day of days) {
-    run = prev !== null && addDays(prev, 1) === day ? run + 1 : 0;
+    run = prev !== null && addDays(prev, 1) === day ? run + 1 : 1;
     if (run > best) best = run;
     prev = day;
   }

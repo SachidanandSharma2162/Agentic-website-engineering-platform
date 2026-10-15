@@ -368,3 +368,13 @@ describe("AC13: routing", () => {
     expect(screen.getByRole("main")).toHaveFocus();
   });
 });
+
+describe("ProgressRing", () => {
+  it("sets the drawn arc inline so no stylesheet rule can override it", () => {
+    mount("/", createMemoryAdapter(seed({ tasks: [task("a", "A", { today: true, done: true }), task("b", "B", { today: true })] })));
+    const arc = screen.getByRole("img", { name: "1 of 2 done" }).querySelector<SVGCircleElement>(".fg")!;
+    const circumference = 2 * Math.PI * 42;
+    expect(parseFloat(arc.style.strokeDasharray)).toBeCloseTo(circumference, 3);
+    expect(parseFloat(arc.style.strokeDashoffset)).toBeCloseTo(circumference / 2, 3);
+  });
+});

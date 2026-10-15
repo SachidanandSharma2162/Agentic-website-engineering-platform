@@ -107,7 +107,7 @@ test.describe("accessibility (AC14)", () => {
     await page.getByRole("textbox", { name: "New task for today" }).fill("Motion check");
     await page.keyboard.press("Enter");
     const durations = await page.evaluate(() => {
-      const ring = getComputedStyle(document.querySelector(".ring .fg")!);
+      const ring = getComputedStyle(document.querySelector(".progress-ring .fg")!);
       const btn = getComputedStyle(document.querySelector(".btn")!);
       return { ring: ring.transitionDuration, btn: btn.transitionDuration };
     });
@@ -174,4 +174,48 @@ test.describe("production build hygiene (AC16)", () => {
     }
     expect(problems).toEqual([]);
   });
+});
+
+// Regression tests for defects that every behavioural check missed and that were only visible in the screenshots:
+// a Tailwind utility collision drew a box around the progress ring, a CSS override left the arc undrawn, and
+// narrow screens broke habit names mid-word.
+test.describe("visual integrity", () => {
+  test("the progress ring draws an arc proportional to progress, with no stray box", async ({ page }) => {
+    await seed(page); // seed data: 1 of 2 pinned tasks done
+    await page.goto("/");
+    const ring = await page.evaluate(() => {
+      const fg = getComputedStyle(document.querySelector(".progress-ring .fg")!);
+      return { dash: parseFloat(fg.strokeDasharray), offset: parseFloat(fg.strokeDashoffset), shadow: getComputedStyle(document.querySelector(".progress-ring")!).boxShadow };
+    });
+    expect(ring.dash).toBeGreaterThan(200);
+    expect(ring.offset / ring.dash).toBeCloseTo(0.5, 2); // half of the ring is drawn
+    expect(ring.shadow).toBe("none");
+
+    await page.getByRole("checkbox", { name: /Mark “Draft the Q4/ }).check();
+    await expect(page.getByRole("img", { name: "2 of 2 done" })).toBeVisible();
+    // The arc animates for 0.5 s, so wait for it to settle rather than sampling mid-transition.
+    await expect
+      .poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.querySelector(".progress-ring .fg")!).strokeDashoffset)), { timeout: 3000 })
+      .toBeCloseTo(0, 1); // fully drawn
+  });
+
+  test("habit names wrap at word boundaries on a phone instead of breaking mid-word", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await seed(page);
+    await page.goto("/habits");
+    const { height, lineHeight } = await page.evaluate(() => {
+      const h = getComputedStyle(document.querySelector(".habit h2")!);
+      return { height: document.querySelector(".habit h2")!.getBoundingClientRect().height, lineHeight: parseFloat(h.lineHeight) };
+    });
+    expect(height).toBeLessThanOrEqual(lineHeight * 2 + 1); // "Walk for 20 minutes" takes at most two lines
+  });
+});
+
+test("on a tablet with little content the top bar keeps its natural height instead of stretching", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto("/"); // empty data: very short page
+  const nav = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
+  expect(nav!.height).toBeLessThan(90);
+  const main = await page.getByRole("main").boundingBox();
+  expect(main!.y).toBeLessThan(100); // content starts right under the bar
 });

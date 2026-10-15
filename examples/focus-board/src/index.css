@@ -41,7 +41,7 @@ main:focus{outline:none}
 .skip:focus{top:var(--s2)}
 
 /* Shell: rail >=1024, top bar 640-1023, bottom tabs <640 */
-.shell{display:grid;min-height:100vh;grid-template-columns:1fr}
+.shell{display:grid;min-height:100vh;grid-template-columns:1fr;grid-template-rows:auto 1fr} /* nav keeps its natural height; main takes the rest */
 .nav{display:flex;gap:var(--s1);background:var(--surface);border-bottom:1px solid var(--line);padding:var(--s2) var(--s4);align-items:center}
 .brand{font-family:var(--font-display);font-weight:700;font-size:1.25rem;display:flex;align-items:center;gap:var(--s2);margin-right:auto}
 .brand i{width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
@@ -58,7 +58,7 @@ main{padding:var(--s5) var(--s4) var(--s8);width:100%;max-width:760px;margin:0 a
   main{padding-bottom:110px}
 }
 @media (min-width:1024px){
-  .shell{grid-template-columns:240px 1fr}
+  .shell{grid-template-columns:240px 1fr;grid-template-rows:1fr}
   .nav{flex-direction:column;align-items:stretch;border-bottom:0;border-right:1px solid var(--line);padding:var(--s6) var(--s4);position:sticky;top:0;height:100vh}
   .brand{margin:0 0 var(--s6);padding-left:var(--s3)}
   main{padding:var(--s7) var(--s6) var(--s8)}
@@ -67,12 +67,13 @@ main{padding:var(--s5) var(--s4) var(--s8);width:100%;max-width:760px;margin:0 a
 /* Page header */
 .eyebrow{font-size:.8125rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .page-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s5);margin-bottom:var(--s5)}
-.ring{--p:0;width:96px;height:96px;flex:none;position:relative}
-.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring circle{fill:none;stroke-width:9}
-.ring .bg{stroke:var(--line)}
-.ring .fg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:calc(264 - 264 * var(--p));transition:stroke-dashoffset .5s var(--ease)}
-.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:1.5rem}
+.progress-ring{width:96px;height:96px;flex:none;position:relative}
+.progress-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.progress-ring circle{fill:none;stroke-width:9}
+.progress-ring .bg{stroke:var(--line)}
+/* dasharray and dashoffset are set inline by ProgressRing; the class name is not "ring" because Tailwind owns that utility */
+.progress-ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .5s var(--ease)}
+.progress-ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:1.5rem}
 
 /* Cards, forms, buttons */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow)}
@@ -123,8 +124,9 @@ label.field{display:grid;gap:var(--s1);font-weight:600;font-size:.9375rem}
 
 /* Habits */
 .habit{padding:var(--s4);display:grid;gap:var(--s3);animation:in .28s var(--ease)}
-.habit-top{display:flex;align-items:center;gap:var(--s3)}
-.habit-top h3{flex:1;font-size:1.2rem;min-width:0;overflow-wrap:anywhere}
+.habit-top{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3)}
+.habit-top h2{flex:1 1 12rem;min-width:0;overflow-wrap:break-word;font-size:1.2rem}
+.habit-top form{flex:1 1 12rem}
 .streaks{display:flex;gap:var(--s5);color:var(--muted);font-size:.9375rem}
 .streaks b{font-family:var(--font-display);font-size:1.5rem;color:var(--ink);margin-right:4px}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s2)}

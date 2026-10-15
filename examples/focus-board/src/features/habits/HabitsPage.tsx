@@ -48,7 +48,7 @@ function HabitCard({ habit }: { habit: Habit }) {
       <div className="habit-top">
         {editing ? (
           <form
-            style={{ flex: 1, display: "flex" }}
+            style={{ display: "flex" }}
             onSubmit={(e: FormEvent) => {
               e.preventDefault();
               finish(true);
@@ -72,7 +72,7 @@ function HabitCard({ habit }: { habit: Habit }) {
             <input id={inputId} className="input" value={draft} maxLength={LIMITS.habitNameMax} autoFocus onFocus={(e) => e.currentTarget.select()} onChange={(e) => setDraft(e.target.value)} />
           </form>
         ) : (
-          <h2 style={{ fontSize: "1.2rem", flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>{habit.name}</h2>
+          <h2>{habit.name}</h2>
         )}
         <button type="button" className={`btn${checked ? "" : " primary"}`} aria-pressed={checked} onClick={() => store.toggleHabitToday(habit.id)}>
           {checked ? "Checked in ✓" : "Check in today"}

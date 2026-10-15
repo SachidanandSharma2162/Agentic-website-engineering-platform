@@ -107,8 +107,9 @@ describe("run-checks", () => {
     writeFileSync(join(dir, "fixed"), "1"); // the operator's repair
     expect((await orch.run(PID)).done).toBe(true);
     const evDir = join(dir, "docs", "evidence");
-    const first = JSON.parse(readFileSync(join(evDir, "chk.attempt-1.json"), "utf8"));
-    const second = JSON.parse(readFileSync(join(evDir, "chk.attempt-2.json"), "utf8"));
+    const attemptFile = (n: number) => readdirSync(evDir).find((f) => f.startsWith("chk.") && f.endsWith(`.attempt-${n}.json`))!;
+    const first = JSON.parse(readFileSync(join(evDir, attemptFile(1)), "utf8"));
+    const second = JSON.parse(readFileSync(join(evDir, attemptFile(2)), "utf8"));
     expect(first.results[0].code).toBe(1);
     expect(first.results[0].output).toContain("FAILED: expected 3 got 2");
     expect(first.results[0].output).not.toContain("");
