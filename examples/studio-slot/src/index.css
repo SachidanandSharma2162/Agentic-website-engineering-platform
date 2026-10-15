@@ -34,6 +34,7 @@ nav{display:flex;gap:var(--s2);flex-wrap:wrap}
 nav a{padding:var(--s2) var(--s4);border-radius:var(--r-pill);text-decoration:none;color:var(--muted);min-height:44px;display:inline-flex;align-items:center;font-weight:500}
 nav a:hover{background:var(--sage-soft);color:var(--ink)}
 nav a[aria-current=page]{background:var(--sage);color:var(--on-sage)}
+@media (max-width:359px){nav a{padding:var(--s2) var(--s2);font-size:.8125rem}.code{padding:var(--s3) var(--s3)}}
 @media (max-width:639px){nav{width:100%}nav a{flex:1 1 auto;justify-content:center;padding:var(--s2) var(--s3);font-size:.9375rem}}
 main{max-width:960px;margin:0 auto;padding:var(--s4) var(--s4) var(--s8)}
 .hero{padding:var(--s5) 0 var(--s5)}
@@ -83,7 +84,7 @@ form.card{padding:var(--s5)}
 /* Confirmation */
 .confirm{padding:var(--s6) var(--s5);text-align:center;display:grid;gap:var(--s4);justify-items:center}
 .breath{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle,var(--sage) 0 30%,var(--sage-soft) 31% 100%);animation:breathe 5s ease-in-out infinite}
-.code{font-size:clamp(1.1rem,6.2vw,1.9rem);letter-spacing:.12em;white-space:nowrap;font-weight:500;padding:var(--s3) var(--s5);border:2px dashed var(--sage);border-radius:var(--r-md);background:var(--sage-soft);user-select:all}
+.code{font-size:clamp(.9rem,4.4vw,1.9rem);letter-spacing:.06em;white-space:nowrap;max-width:100%;font-weight:500;padding:var(--s3) var(--s5);border:2px dashed var(--sage);border-radius:var(--r-md);background:var(--sage-soft);user-select:all}
 
 /* Admin */
 .rost{margin:var(--s3) 0 0;padding:0;list-style:none;display:grid;gap:var(--s1);color:var(--muted);font-size:.9375rem}

@@ -62,6 +62,7 @@ Colour is never the only signal: availability is a word, current page is a fille
 Cards rise 8 px and fade in (400 ms); skeleton shimmer; a 5 s breathing circle on the confirmation. Only transform and opacity animate; buttons animate only their press (transform), never their colours, because a colour cross-fade passes through low-contrast states (found by an intermittent axe failure). `prefers-reduced-motion: reduce` removes all animation and transitions.
 
 ## Responsive rules
+Fonts: the preferred stack is only present on some systems; layouts must also hold with a wide fallback font (tested with Verdana at 320, 375 and 768 px). The cancellation code scales with the viewport (`clamp(.9rem, 4.4vw, 1.9rem)`) and never wraps; below 360 px the nav pills shrink slightly.
 Mobile first; content max width 960 px; breakpoint at 640 px where cards stack (time, then title, then badge and a full-width Book button) and the form grid becomes one column. The nav pills share a row at every width. No fixed-width text containers.
 
 ## Accessibility checklist

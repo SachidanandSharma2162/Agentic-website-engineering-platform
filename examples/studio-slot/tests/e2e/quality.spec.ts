@@ -10,6 +10,15 @@ async function seriousOrCritical(page: Page) {
   return results.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.map((n) => n.target.join(" ")) }));
 }
 
+/** How many lines of text an element's content occupies (a box's height also includes padding, so it cannot answer this). */
+function textLines(page: Page, testId: string): Promise<number> {
+  return page.evaluate((id) => {
+    const range = document.createRange();
+    range.selectNodeContents(document.querySelector(`[data-testid=${id}]`)!);
+    return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+  }, testId);
+}
+
 /** Make sure the schedule has a spread of states (open, few left, full, cancelled) for the checks below. */
 async function seedStates(request: Parameters<typeof createClass>[0]) {
   const open = await createClass(request, { capacity: 12 });
@@ -220,15 +229,48 @@ test.describe("responsive layout (AC13)", () => {
       await page.getByRole("button", { name: "Reserve my spot" }).click();
       await expect(page.getByTestId("code")).toBeVisible();
       await overflow("confirmation");
-      const box = await page.getByTestId("code").boundingBox();
-      const line = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("[data-testid=code]")!).lineHeight));
-      expect(box!.height, "the cancellation code must stay on one line").toBeLessThan(line * 2);
+      expect(await textLines(page, "code"), "the cancellation code must stay on one line").toBe(1);
 
       await ownerSignIn(page);
       await expect(page.locator("article").first()).toBeVisible();
       await overflow("owner dashboard");
     });
   }
+
+  // Linux and many Android phones have none of the design's preferred fonts (Optima, Candara), so the browser falls back to a
+  // wider system font. Forcing one here keeps the layout honest on machines that happen to have the nice fonts installed.
+  test("layout holds with a wide fallback font: no horizontal scroll, cancellation code on one line, nav on one row from 375 px", async ({ page, request }) => {
+    const c = await createClass(request, { title: `Wide font class ${uniq()}`, capacity: 3 });
+    await page.addInitScript(() => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const style = document.createElement("style");
+        style.textContent = '* { font-family: Verdana, "DejaVu Sans", sans-serif !important }';
+        document.head.append(style);
+      });
+    });
+    const scrolls = () => page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+
+    for (const width of [320, 375, 768]) {
+      await page.setViewportSize({ width, height: 812 });
+      for (const route of ROUTES) {
+        await page.goto(route);
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        expect(await scrolls(), `${width}px ${route} scrolls horizontally`).toBe(false);
+        if (width >= 375) {
+          const tops = await page.locator("nav a").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+          expect(new Set(tops).size, `${width}px nav wraps`).toBe(1);
+        }
+      }
+      await page.goto("/");
+      await card(page, c.title).getByRole("link", { name: /^Book/ }).click();
+      await page.getByLabel("Your name").fill("Wide Font");
+      await page.getByLabel("Email").fill(`wide.${width}.${uniq()}@example.com`);
+      await page.getByRole("button", { name: "Reserve my spot" }).click();
+      await expect(page.getByTestId("code")).toBeVisible();
+      expect(await textLines(page, "code"), `${width}px: the cancellation code must not wrap`).toBe(1);
+      expect(await scrolls(), `${width}px confirmation scrolls horizontally`).toBe(false);
+    }
+  });
 
   test("navigation pills share one row on a phone", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });

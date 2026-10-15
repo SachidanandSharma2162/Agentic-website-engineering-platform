@@ -7,7 +7,7 @@ Re-run with `npm run typecheck && npm run lint && npm test && npm run build && n
 |---|---|
 | Type-check (`tsc -b`, strict), lint | pass |
 | Unit, component and API tests (Vitest, real SQLite) | 117 passed: 31 time zone, 23 component, 61 API, 2 multi-process concurrency |
-| End-to-end (Playwright, built site + API + SQLite) | 42 tests in Chrome, Firefox and WebKit: 126 of 126 passed |
+| End-to-end (Playwright, built site + API + SQLite) | 43 tests in Chrome, Firefox and WebKit: 129 of 129 passed |
 | Same E2E suite on the real Cloudflare Pages Functions runtime with a local D1 (`wrangler pages dev`, fresh database) | 126 of 126 passed |
 | Concurrency on that runtime | 30 simultaneous bookings for 5 seats gave exactly 5 successes, 3 runs out of 3 |
 | Production build | pass; JavaScript 113.7 KB gzipped (budget 200 KB), CSS 2.3 KB |
@@ -47,11 +47,13 @@ Mutation checks (tests proven able to fail): removing the capacity condition fai
 | Prototype race: navigating away during loading wrote into the wrong screen | found in design review; the real loader ignores and cancels stale requests (component test) |
 | Honeypot response had a different shape from a real success | review; now identical |
 
+| Cancellation code overflowed a 375 px phone (385 px wide) and the nav wrapped at 320 px when the browser used a wide fallback font, which is what Linux and many Android phones do because Optima and Candara are not installed | GitHub CI (Linux) failed while every local run on Windows passed; reproduced by forcing a wide font; CSS fixed, permanent wide-font test added and proven to fail without the fix |
 | Owner page listed every future class: 534 classes in one page after many test runs made an accessibility scan time out (the API itself answered in 26 ms) | a timeout on the real-runtime run; the owner list is now limited to the next 60 days (test added) |
 
 Several failures were mistakes in my own tests (ambiguous locators, assertions on the wrong wording, racing page render); each was fixed in the test, not by weakening an assertion.
 
 ## Browser and platform notes
+- **Fonts differ by operating system.** The local machine has Candara; GitHub's Linux runner does not. A layout that only passes with the preferred font is not tested, so one test forces a wide fallback font at 320, 375 and 768 px.
 - Playwright's WebKit build does not Tab onto links (Safari's default), so the tab-stop focus-ring walk runs in Chrome and Firefox; WebKit still runs the keyboard-only booking flow by focusing links directly.
 - Running three browsers at once on one machine caused timeouts that were overload, not defects; multi-browser runs use 3 workers.
 - Cloudflare Pages answers unknown paths with the app shell (status 200); the local server answers 404. The test asserts only that a missing script is never served as script.
