@@ -1,0 +1,8 @@
+{
+  "name": "@sdlc/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": { "sdlc": "./src/main.ts" },
+  "dependencies": { "@sdlc/core": "*", "@sdlc/tools": "*", "@sdlc/providers": "*", "@sdlc/roles": "*" }
+}
