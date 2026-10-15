@@ -41,6 +41,7 @@ const USAGE = `sdlc: agentic website engineering platform
   init <name> "<request>" [--dir examples/<slug>] [--deploy-name <slug>]
   run <project>                       run every task that can run; stops at gates / operator work
   status <project> [--events]         task graph, approvals, deployments
+  reopen  <project> <task> --reason "<why>"   re-run a task and everything downstream after a code change
   approve <project> <gate> --by <who> [--scope <s>] [--note <n>]
   reject  <project> <gate> --by <who> [--scope <s>] [--note <n>]
   projects                            list projects
@@ -127,6 +128,18 @@ async function cmdRun(args: ReturnType<typeof parseArgs>): Promise<void> {
   store.close();
 }
 
+function cmdReopen(args: ReturnType<typeof parseArgs>): void {
+  const [, id, taskId] = args.positional;
+  const reason = typeof args.flags.reason === "string" ? args.flags.reason : "";
+  if (!id || !taskId || !reason) throw new Error('usage: reopen <project> <task> --reason "<why>"');
+  const store = openStore();
+  need(store.getProject(id), id);
+  const orch = new Orchestrator({ store, executors: {} });
+  const reset = orch.reopen(id, taskId, reason);
+  console.log(`Reopened: ${reset.join(", ")}`);
+  store.close();
+}
+
 function cmdStatus(args: ReturnType<typeof parseArgs>): void {
   const id = args.positional[1];
   if (!id) throw new Error("usage: status <project>");
@@ -174,6 +187,7 @@ async function main(): Promise<void> {
     case "init": return cmdInit(args);
     case "run": case "resume": return cmdRun(args);
     case "status": return cmdStatus(args);
+    case "reopen": return cmdReopen(args);
     case "approve": return cmdDecision(args, "approved");
     case "reject": return cmdDecision(args, "rejected");
     case "projects": {

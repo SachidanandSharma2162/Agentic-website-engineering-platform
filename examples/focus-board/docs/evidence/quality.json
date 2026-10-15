@@ -1,0 +1,46 @@
+{
+  "task": "quality",
+  "at": "2026-10-15T17:33:06.380Z",
+  "results": [
+    {
+      "name": "type-check",
+      "command": "npm run typecheck",
+      "code": 0,
+      "durationMs": 2986,
+      "timedOut": false,
+      "output": "> focus-board@1.0.0 typecheck\n> tsc -b --noEmit"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "code": 0,
+      "durationMs": 4081,
+      "timedOut": false,
+      "output": "> focus-board@1.0.0 lint\n> eslint ."
+    },
+    {
+      "name": "unit-tests",
+      "command": "npm test",
+      "code": 0,
+      "durationMs": 9169,
+      "timedOut": false,
+      "output": "> focus-board@1.0.0 test\n> vitest run\n\n\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.5 \u001b[39m\u001b[90mC:/Users/Sachidanand Sharma/agentic-sdlc-platform/examples/focus-board\u001b[39m\n\n \u001b[32m✓\u001b[39m tests/unit/storage.test.ts \u001b[2m(\u001b[22m\u001b[2m23 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 15\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/unit/domain.test.ts \u001b[2m(\u001b[22m\u001b[2m56 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 12\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/unit/app.test.tsx \u001b[2m(\u001b[22m\u001b[2m35 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 5240\u001b[2mms\u001b[22m\u001b[39m\n   \u001b[32m✓\u001b[39m AC1: adding tasks \u001b[2m(3)\u001b[22m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m adds a task to the top and clears the field\u001b[33m 446\u001b[2mms\u001b[22m\u001b[39m\n   \u001b[32m✓\u001b[39m AC3: editing tasks \u001b[2m(4)\u001b[22m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m saves on Enter, including a priority change\u001b[33m 390\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m saves when focus leaves the row\u001b[33m 316\u001b[2mms\u001b[22m\u001b[39m\n   \u001b[32m✓\u001b[39m AC7: habit check-ins \u001b[2m(3)\u001b[22m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m adds, renames and deletes habits (with confirmation)\u001b[33m 607\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m3 passed\u001b[39m\u001b[22m\u001b[90m (3)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m114 passed\u001b[39m\u001b[22m\u001b[90m (114)\u001b[39m\n\u001b[2m   Start at \u001b[22m 13:32:38\n\u001b[2m   Duration \u001b[22m 8.21s\u001b[2m (tests 45%, environment 33%, import 11%, setup 8%, transform 3%)\u001b[22m\n\n\nNot implemented: Window's scrollTo() method\nNot implemented: Window's scrollTo() method"
+    },
+    {
+      "name": "production-build",
+      "command": "npm run build",
+      "code": 0,
+      "durationMs": 4059,
+      "timedOut": false,
+      "output": "> focus-board@1.0.0 build\n> tsc -b && vite build\n\n\u001b[36mvite v8.3.4 \u001b[32mbuilding client environment for production...\u001b[36m\u001b[39m\ntransforming...\n✓ 2521 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.65 kB │ gzip:   0.38 kB\ndist/assets/index-DO1p7kv7.css   19.78 kB │ gzip:   5.01 kB\ndist/assets/index-B19ssMfp.js   450.17 kB │ gzip: 143.40 kB\n\n\u001b[32m✓ built in 815ms\u001b[39m"
+    },
+    {
+      "name": "e2e",
+      "command": "npm run e2e",
+      "code": 0,
+      "durationMs": 15165,
+      "timedOut": false,
+      "output": "…ical violations on / (2.1s)\n  ok 14 tests\\e2e\\quality.spec.ts:12:5 › accessibility (AC14) › axe: no serious or critical violations on /tasks (2.1s)\n  ok 15 tests\\e2e\\quality.spec.ts:12:5 › accessibility (AC14) › axe: no serious or critical violations on /habits (2.1s)\n  ok 16 tests\\e2e\\quality.spec.ts:12:5 › accessibility (AC14) › axe: no serious or critical violations on /settings (2.3s)\n  ok 19 tests\\e2e\\quality.spec.ts:83:3 › accessibility (AC14) › the confirmation dialog traps focus, starts on Cancel and returns focus to its trigger (1.7s)\n  ok 22 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › mobile 375px /tasks: no horizontal scroll or overflowing elements (1.2s)\n  ok 21 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › mobile 375px /: no horizontal scroll or overflowing elements (1.3s)\n  ok 23 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › mobile 375px /habits: no horizontal scroll or overflowing elements (1.3s)\n  ok 18 tests\\e2e\\quality.spec.ts:42:3 › accessibility (AC14) › everything is keyboard operable, and every focusable element shows a visible focus ring (2.6s)\n  ok 24 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › mobile 375px /settings: no horizontal scroll or overflowing elements (1.0s)\n  ok 20 tests\\e2e\\quality.spec.ts:103:3 › accessibility (AC14) › prefers-reduced-motion disables CSS animation and transitions (1.7s)\n  ok 25 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /: no horizontal scroll or overflowing elements (1.1s)\n  ok 28 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /settings: no horizontal scroll or overflowing elements (1.0s)\n  ok 27 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /habits: no horizontal scroll or overflowing elements (1.1s)\n  ok 29 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /: no horizontal scroll or overflowing elements (1.1s)\n  ok 26 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /tasks: no horizontal scroll or overflowing elements (1.4s)\n  ok 30 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /tasks: no horizontal scroll or overflowing elements (1.3s)\n  ok 31 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /habits: no horizontal scroll or overflowing elements (1.3s)\n  ok 32 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /settings: no horizontal scroll or overflowing elements (802ms)\n  ok 33 tests\\e2e\\quality.spec.ts:146:3 › responsive layout (AC15) › navigation adapts: bottom tabs on mobile, left rail on desktop (787ms)\n  ok 34 tests\\e2e\\quality.spec.ts:160:3 › production build hygiene (AC16) › no console errors, failed requests or cross-origin requests on any route (1.0s)\n  ok 17 tests\\e2e\\quality.spec.ts:20:3 › accessibility (AC14) › axe: empty states, edit mode, toast and confirmation dialog (6.2s)\n\n  34 passed (14.2s)"
+    }
+  ]
+}

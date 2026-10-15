@@ -74,6 +74,37 @@ export class Orchestrator {
     this.store.appendEvent({ projectId, type: "tasks.added", data: { count: fresh.length } });
   }
 
+  /**
+   * Invalidate a task and everything downstream of it so it runs again, e.g. after the code changed following a passing
+   * quality run. Refuses while anything affected is RUNNING, and refuses when it would silently discard a completed
+   * deployment (that is a high-risk action needing its own approval). Returns the ids that were reset.
+   */
+  reopen(projectId: string, taskId: string, reason: string): string[] {
+    if (!reason.trim()) throw new Error("a reason is required to reopen a task");
+    const tasks = this.store.listTasks(projectId);
+    if (!tasks.some((t) => t.id === taskId)) throw new Error(`Unknown task ${taskId}`);
+    const affected = new Set([taskId]);
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const t of tasks) {
+        if (!affected.has(t.id) && t.dependsOn.some((d) => affected.has(d))) {
+          affected.add(t.id);
+          grew = true;
+        }
+      }
+    }
+    const hit = tasks.filter((t) => affected.has(t.id));
+    const running = hit.find((t) => t.status === "RUNNING");
+    if (running) throw new Error(`cannot reopen: ${running.id} is RUNNING`);
+    const deployed = hit.find((t) => t.status === "COMPLETED" && t.gates.some((g) => g === "C" || g === "D"));
+    if (deployed) throw new Error(`cannot reopen: ${deployed.id} already completed under a deployment approval; undoing it needs Gate E approval`);
+    for (const t of hit) {
+      this.store.updateTask(projectId, t.id, { status: "PLANNED", retryCount: 0, lastError: undefined, blockedReason: undefined, finishedAt: undefined });
+    }
+    this.store.appendEvent({ projectId, type: "task.reopened", taskId, data: { reason, reset: hit.map((t) => t.id) } });
+    return hit.map((t) => t.id);
+  }
+
   /** Any task left RUNNING by a crash is returned to READY; completed work is never redone. */
   recover(projectId: string): string[] {
     const recovered: string[] = [];

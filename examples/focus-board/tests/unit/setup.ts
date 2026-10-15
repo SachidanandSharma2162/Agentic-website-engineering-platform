@@ -4,6 +4,9 @@ import { afterEach } from "vitest";
 
 afterEach(() => cleanup());
 
+// jsdom does not implement scrolling; the app scrolls to the top on navigation.
+window.scrollTo = () => {};
+
 // jsdom does not implement the modal <dialog> API; this minimal stand-in follows the spec for open/close and the close event.
 if (!HTMLDialogElement.prototype.showModal) {
   HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {

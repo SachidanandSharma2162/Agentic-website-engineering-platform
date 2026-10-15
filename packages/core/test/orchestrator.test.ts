@@ -122,6 +122,47 @@ describe("retries, blocking, waiting, timeouts", () => {
     expect(calls).toBe(3); // a BLOCKED task is never silently re-run
   });
 
+  it("reopen resets a task and its dependents so they run again, and records why", async () => {
+    let runs = 0;
+    const orch = setup({ ok: async () => (runs++, { ok: true }) }, [mk("a"), mk("b", { dependsOn: ["a"] }), mk("c", { dependsOn: ["b"] }), mk("other")]);
+    expect((await orch.run(PID)).done).toBe(true);
+    expect(runs).toBe(4);
+    expect(orch.reopen(PID, "b", "code changed after quality passed").sort()).toEqual(["b", "c"]);
+    expect(store.getTask(PID, "a")?.status).toBe("COMPLETED"); // upstream and unrelated work is kept
+    expect(store.getTask(PID, "other")?.status).toBe("COMPLETED");
+    expect(store.getTask(PID, "b")).toMatchObject({ status: "PLANNED", retryCount: 0 });
+    expect((await orch.run(PID)).done).toBe(true);
+    expect(runs).toBe(6);
+    expect(store.listEvents(PID).some((e) => e.type === "task.reopened" && (e.data as { reason: string }).reason.includes("code changed"))).toBe(true);
+  });
+
+  it("reopen clears a BLOCKED task's error and retry count", async () => {
+    const orch = setup({ ok: async () => ({ ok: false, error: "boom", retryable: false }) }, [mk("t")]);
+    await orch.run(PID);
+    expect(store.getTask(PID, "t")?.status).toBe("BLOCKED");
+    orch.reopen(PID, "t", "fixed the cause");
+    const t = store.getTask(PID, "t")!;
+    expect(t).toMatchObject({ status: "PLANNED", retryCount: 0 });
+    expect(t.lastError).toBeUndefined();
+    expect(t.blockedReason).toBeUndefined();
+  });
+
+  it("reopen requires a reason, rejects unknown tasks, and refuses to undo a completed deployment-gated task", async () => {
+    const orch = setup({ ok }, [mk("build"), mk("deploy", { dependsOn: ["build"], gates: ["C", "D"] })]);
+    store.updateTask(PID, "build", { status: "COMPLETED" });
+    store.updateTask(PID, "deploy", { status: "COMPLETED" });
+    expect(() => orch.reopen(PID, "build", "  ")).toThrow(/reason/);
+    expect(() => orch.reopen(PID, "nope", "why")).toThrow(/Unknown task/);
+    expect(() => orch.reopen(PID, "build", "why")).toThrow(/Gate E/);
+    expect(store.getTask(PID, "build")?.status).toBe("COMPLETED"); // nothing was changed by the refusals
+  });
+
+  it("reopen refuses while an affected task is RUNNING", () => {
+    const orch = setup({ ok }, [mk("a"), mk("b", { dependsOn: ["a"] })]);
+    store.updateTask(PID, "b", { status: "RUNNING" });
+    expect(() => orch.reopen(PID, "a", "why")).toThrow(/RUNNING/);
+  });
+
   it("non-retryable failures block immediately", async () => {
     let calls = 0;
     const orch = setup({ ok: async () => (calls++, { ok: false, retryable: false, error: "nope" }) }, [mk("t")]);
