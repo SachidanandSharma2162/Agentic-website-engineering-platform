@@ -1,13 +1,13 @@
 {
   "task": "quality",
   "attempt": 1,
-  "at": "2026-10-15T17:48:04.602Z",
+  "at": "2026-10-15T19:19:36.498Z",
   "results": [
     {
       "name": "type-check",
       "command": "npm run typecheck",
       "code": 0,
-      "durationMs": 2791,
+      "durationMs": 3115,
       "timedOut": false,
       "output": "> focus-board@1.0.0 typecheck\n> tsc -b --noEmit"
     },
@@ -15,7 +15,7 @@
       "name": "lint",
       "command": "npm run lint",
       "code": 0,
-      "durationMs": 3765,
+      "durationMs": 3584,
       "timedOut": false,
       "output": "> focus-board@1.0.0 lint\n> eslint ."
     },
@@ -23,25 +23,25 @@
       "name": "unit-tests",
       "command": "npm test",
       "code": 0,
-      "durationMs": 8555,
+      "durationMs": 39914,
       "timedOut": false,
-      "output": "> focus-board@1.0.0 test\n> vitest run\n\n\n RUN  v5.0.5 C:/Users/Sachidanand Sharma/agentic-sdlc-platform/examples/focus-board\n\n ✓ tests/unit/storage.test.ts (23 tests) 15ms\n ✓ tests/unit/domain.test.ts (56 tests) 12ms\n ✓ tests/unit/app.test.tsx (37 tests) 5296ms\n   ✓ AC1: adding tasks (3)\n     ✓ adds a task to the top and clears the field 428ms\n   ✓ AC3: editing tasks (4)\n     ✓ saves on Enter, including a priority change 449ms\n   ✓ AC7: habit check-ins (3)\n     ✓ adds, renames and deletes habits (with confirmation) 608ms\n\n Test Files  3 passed (3)\n      Tests  116 passed (116)\n   Start at  13:47:35\n   Duration  7.68s (tests 52%, environment 28%, import 10%, setup 6%, transform 4%)"
+      "output": "> focus-board@1.0.0 test\n> vitest run\n\n\n RUN  v5.0.5 C:/Users/Sachidanand Sharma/agentic-sdlc-platform/examples/focus-board\n\n ✓ tests/unit/csp.test.ts (1 test) 646ms\n   ✓ never probes for eval support, which a strict Content-Security-Policy would report as a violation 642ms\n ✓ tests/unit/storage.test.ts (23 tests) 27ms\n ✓ tests/unit/domain.test.ts (56 tests) 22ms\n ✓ tests/unit/app.test.tsx (37 tests) 5306ms\n   ✓ AC1: adding tasks (3)\n     ✓ adds a task to the top and clears the field 435ms\n   ✓ AC3: editing tasks (4)\n     ✓ saves on Enter, including a priority change 364ms\n     ✓ cancels on Escape without saving 329ms\n   ✓ AC7: habit check-ins (3)\n     ✓ adds, renames and deletes habits (with confirmation) 588ms\n   ✓ AC9: persistence (3)\n     ✓ a fresh mount with the same storage shows identical data 314ms\n\n Test Files  4 passed (4)\n      Tests  117 passed (117)\n   Start at  15:17:53\n   Duration  37.90s (environment 75%, setup 16%, tests 5%, import 4%, transform 1%)"
     },
     {
       "name": "production-build",
       "command": "npm run build",
       "code": 0,
-      "durationMs": 4014,
+      "durationMs": 4611,
       "timedOut": false,
-      "output": "> focus-board@1.0.0 build\n> tsc -b && vite build\n\nvite v8.3.4 building client environment for production...\ntransforming...\n✓ 2521 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.65 kB │ gzip:   0.38 kB\ndist/assets/index-1nxq8YVd.css   19.88 kB │ gzip:   5.03 kB\ndist/assets/index-CAymwNvC.js   450.11 kB │ gzip: 143.36 kB\n\n✓ built in 799ms"
+      "output": "> focus-board@1.0.0 build\n> tsc -b && vite build\n\nvite v8.3.4 building client environment for production...\ntransforming...\n✓ 2521 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.65 kB │ gzip:   0.38 kB\ndist/assets/index-1nxq8YVd.css   19.88 kB │ gzip:   5.03 kB\ndist/assets/index-D1wSnU4l.js   450.13 kB │ gzip: 143.38 kB\n\n✓ built in 1.21s"
     },
     {
-      "name": "e2e",
-      "command": "npm run e2e",
+      "name": "e2e-chrome-firefox-webkit",
+      "command": "npm run e2e:all",
       "code": 0,
-      "durationMs": 17292,
+      "durationMs": 60778,
       "timedOut": false,
-      "output": "…e\\quality.spec.ts:128:7 › responsive layout (AC15) › mobile 375px /settings: no horizontal scroll or overflowing elements (1.3s)\n  ok 26 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /tasks: no horizontal scroll or overflowing elements (1.3s)\n  ok 25 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /: no horizontal scroll or overflowing elements (1.4s)\n  ok 28 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /settings: no horizontal scroll or overflowing elements (1.3s)\n  ok 29 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /: no horizontal scroll or overflowing elements (1.3s)\n  ok 30 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /tasks: no horizontal scroll or overflowing elements (1.1s)\n  ok 27 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › tablet 768px /habits: no horizontal scroll or overflowing elements (2.3s)\n  ok 32 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /settings: no horizontal scroll or overflowing elements (1.0s)\n  -  38 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /\n  -  39 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /tasks\n  -  40 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /habits\n  -  41 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /settings\n  -  42 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /\n  -  43 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /tasks\n  -  44 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /habits\n  -  45 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /settings\n  -  46 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /\n  -  47 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /tasks\n  -  48 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /habits\n  -  49 tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /settings\n  ok 31 tests\\e2e\\quality.spec.ts:128:7 › responsive layout (AC15) › desktop 1280px /habits: no horizontal scroll or overflowing elements (1.3s)\n  ok 33 tests\\e2e\\quality.spec.ts:146:3 › responsive layout (AC15) › navigation adapts: bottom tabs on mobile, left rail on desktop (1.3s)\n  ok 36 tests\\e2e\\quality.spec.ts:202:3 › visual integrity › habit names wrap at word boundaries on a phone instead of breaking mid-word (912ms)\n  ok 37 tests\\e2e\\quality.spec.ts:214:1 › on a tablet with little content the top bar keeps its natural height instead of stretching (924ms)\n  ok 34 tests\\e2e\\quality.spec.ts:160:3 › production build hygiene (AC16) › no console errors, failed requests or cross-origin requests on any route (1.7s)\n  ok 35 tests\\e2e\\quality.spec.ts:183:3 › visual integrity › the progress ring draws an arc proportional to progress, with no stray box (2.1s)\n  ok 17 tests\\e2e\\quality.spec.ts:20:3 › accessibility (AC14) › axe: empty states, edit mode, toast and confirmation dialog (7.0s)\n\n  12 skipped\n  37 passed (16.2s)"
+      "output": "… (AC15) › tablet 768px /settings: no horizontal scroll or overflowing elements (953ms)\n  ok 118 [webkit] › tests\\e2e\\quality.spec.ts:42:3 › accessibility (AC14) › everything is keyboard operable, and every focusable element shows a visible focus ring (4.4s)\n  ok 129 [webkit] › tests\\e2e\\quality.spec.ts:129:7 › responsive layout (AC15) › desktop 1280px /: no horizontal scroll or overflowing elements (1.1s)\n  ok 130 [webkit] › tests\\e2e\\quality.spec.ts:129:7 › responsive layout (AC15) › desktop 1280px /tasks: no horizontal scroll or overflowing elements (1.1s)\n  ok 131 [webkit] › tests\\e2e\\quality.spec.ts:129:7 › responsive layout (AC15) › desktop 1280px /habits: no horizontal scroll or overflowing elements (1.1s)\n  ok 132 [webkit] › tests\\e2e\\quality.spec.ts:129:7 › responsive layout (AC15) › desktop 1280px /settings: no horizontal scroll or overflowing elements (1.1s)\n  -  139 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /\n  -  140 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /tasks\n  -  141 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /habits\n  -  142 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot mobile /settings\n  -  143 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /\n  -  144 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /tasks\n  -  145 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /habits\n  -  146 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot tablet /settings\n  -  147 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /\n  -  148 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /tasks\n  -  149 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /habits\n  -  150 [webkit] › tests\\e2e\\screenshots.spec.ts:16:5 › screenshot desktop /settings\n  ok 133 [webkit] › tests\\e2e\\quality.spec.ts:147:3 › responsive layout (AC15) › navigation adapts: bottom tabs on mobile, left rail on desktop (865ms)\n  ok 136 [webkit] › tests\\e2e\\quality.spec.ts:211:3 › visual integrity › habit names wrap at word boundaries on a phone instead of breaking mid-word (775ms)\n  ok 138 [webkit] › tests\\e2e\\quality.spec.ts:234:1 › security headers from public/_headers are served (locally by vite preview, in production by Cloudflare Pages) (600ms)\n  ok 137 [webkit] › tests\\e2e\\quality.spec.ts:224:1 › on a tablet with little content the top bar keeps its natural height instead of stretching (824ms)\n  ok 134 [webkit] › tests\\e2e\\quality.spec.ts:161:3 › production build hygiene (AC16) › no console errors, failed requests or cross-origin requests on any route (1.7s)\n  ok 135 [webkit] › tests\\e2e\\quality.spec.ts:191:3 › visual integrity › the progress ring draws an arc proportional to progress, with no stray box (1.9s)\n  ok 117 [webkit] › tests\\e2e\\quality.spec.ts:20:3 › accessibility (AC14) › axe: empty states, edit mode, toast and confirmation dialog (9.6s)\n\n  36 skipped\n  114 passed (58.4s)"
     }
   ]
 }

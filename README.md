@@ -2,7 +2,7 @@
 
 A reusable engineering workflow for turning a natural-language website request into a tested, deployed site, with human approval gates at every important decision.
 
-**Status: milestones 1-5 done locally; the first site (Focus Board) is built and tested but not deployed.** See [plans/implementation-plan.md](plans/implementation-plan.md) for what exists, what is verified and what is not yet done.
+**Status: milestones 1-7 done and milestone 8 partly done. The first site (Focus Board) is built, tested and live at https://focus-board.pages.dev; a newer release candidate is validated but not yet deployed.** See [plans/implementation-plan.md](plans/implementation-plan.md) for what exists, what is verified and what is not yet done.
 
 ## What it is (and is not)
 
@@ -24,6 +24,8 @@ npm run sdlc -- run my-site
 npm run sdlc -- status my-site
 npm run sdlc -- approve my-site A --by "<your name>"
 npm run sdlc -- reopen my-site quality --reason "code changed"   # re-run a task and everything downstream
+npm run sdlc -- reopen my-site quality --reason "..." --new-release   # also revokes Gate C/D for a deployed site
+npm run sdlc -- templates            # category templates and feature modules
 ```
 
 State lives in `state/platform.db` (SQLite) with an append-only `state/events.jsonl` audit log; both are git-ignored. Set `SDLC_STATE_DIR` to use another location.

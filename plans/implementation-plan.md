@@ -10,8 +10,8 @@ Approved at Gate A (platform plan), scope: milestones 1-6 first; milestones 7-8 
 | M4 First complete website (Focus Board) | **Built, tested and deployed: https://focus-board.pages.dev** | Gates A' and B approved; 116 unit/component + 37 E2E tests, axe clean, 143 KB gzip JS; see examples/focus-board/docs/test-report.md |
 | M5 Testing and self-healing on the site | **Demonstrated once** | one deliberately injected defect detected by the quality gate, repaired by the operator, full regression re-run: examples/focus-board/docs/self-heal-report.md |
 | M6 Deployment adapters, live deploy | **Cloudflare Pages deployed for real** (Gates C and D approved, scoped to `cloudflare-pages:focus-board`); adapter now creates the missing project on first deploy | evidence: examples/focus-board/docs/evidence/ (deploy-*, smoke.json, live-verification.json). Only one provider exists; others are untested |
-| M7 Generalization | Deferred | |
-| M8 Hardening | Deferred | |
+| M7 Generalization | **Done (templates, not a second site)** | 9 category templates, 16 feature modules with acceptance templates and Gate E flags, template-driven spec drafts, optional backend task, `sdlc templates`; 9-request generalisation matrix test; CLI run on two different requests. No second full website has been built with the platform yet |
+| M8 Hardening | **Partly done** | done: crash recovery verified with a killed process, approval revocation for new releases, cross-browser E2E, production headers in local preview, CSP finding fixed, richer smoke checks, Dependabot config. Not done: see "Not yet verified" |
 
 ## Platform changes made while building the first site
 
@@ -20,11 +20,19 @@ Approved at Gate A (platform plan), scope: milestones 1-6 first; milestones 7-8 
 - Per-attempt, timestamped evidence files; terminal colour codes stripped from evidence.
 - Root vitest scoped to platform packages; example sites are standalone projects with their own lockfile.
 
+## Release candidate 2 (Focus Board)
+
+Validated through the platform (117 unit/component tests; 114 E2E runs across Chrome, Firefox and WebKit; 0 audit findings). **It is not deployed**: the live site still serves the first candidate, whose bundle triggers a CSP `eval` report (harmless, caught, but visible in Firefox). Deploying candidate 2 needs fresh Gate C and D approvals (the old ones were revoked by `reopen --new-release`) and a new Cloudflare token.
+
 ## Not yet verified
 
 - Cloudflare free-tier limits under real traffic (one 4-file deployment was made).
 - GitHub Actions workflow (`.github/workflows/ci.yml`): written but never run (no remote).
-- Firefox and Safari; manual screen-reader testing of the site.
+- Real Safari on macOS (only Playwright's WebKit build on Windows was run); manual screen-reader testing of the site.
+- GitHub Actions: no run had appeared on GitHub when last checked.
+- A second, structurally different site built end to end (the templates are tested, not proven by a second build).
+- Providers other than Cloudflare Pages.
+- Dependabot (config written, never run).
 - Crash-recovery with an actually killed process (logic is unit-tested via simulated state).
 
 ## Acceptance criteria for the platform MVP
