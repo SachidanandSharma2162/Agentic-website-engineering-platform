@@ -99,6 +99,24 @@ describe("run-checks", () => {
     expect(s.done).toBe(false);
   });
 
+  it("keeps evidence for every attempt (so a failure survives a later passing run) and strips terminal colour codes", async () => {
+    writeFileSync(join(dir, "flaky.js"), "const fs=require('fs');const n=fs.existsSync('fixed')?0:1;console.log('\u001b[31mred\u001b[0m text');if(n)console.error('FAILED: expected 3 got 2');process.exit(n)");
+    const orch = new Orchestrator({ store, executors: createExecutors({ providers: {} }), retryMode: "per-run" });
+    orch.addTasks(PID, [{ ...plan()[0]!, id: "chk", action: "builtin.run-checks", artifacts: [], params: { commands: [{ name: "flaky", cmd: "node", args: ["flaky.js"] }] } }]);
+    expect((await orch.run(PID)).retrying).toHaveLength(1);
+    writeFileSync(join(dir, "fixed"), "1"); // the operator's repair
+    expect((await orch.run(PID)).done).toBe(true);
+    const evDir = join(dir, "docs", "evidence");
+    const first = JSON.parse(readFileSync(join(evDir, "chk.attempt-1.json"), "utf8"));
+    const second = JSON.parse(readFileSync(join(evDir, "chk.attempt-2.json"), "utf8"));
+    expect(first.results[0].code).toBe(1);
+    expect(first.results[0].output).toContain("FAILED: expected 3 got 2");
+    expect(first.results[0].output).not.toContain("");
+    expect(first.results[0].output).toContain("red text");
+    expect(second.results[0].code).toBe(0);
+    expect(JSON.parse(readFileSync(join(evDir, "chk.json"), "utf8")).attempt).toBe(2); // latest alias
+  });
+
   it("blocks immediately when a command violates policy", async () => {
     const orch = new Orchestrator({ store, executors: createExecutors({ providers: {} }) });
     orch.addTasks(PID, [{ ...plan()[0]!, id: "chk", action: "builtin.run-checks", artifacts: [], params: { commands: [{ name: "evil", cmd: "curl", args: ["http://x"] }] } }]);

@@ -22,7 +22,11 @@ interface CheckCommand {
   args: string[];
 }
 
-const tail = (s: string, n = 3000) => (s.length > n ? "…" + s.slice(-n) : s);
+const ANSI = /[[0-9;]*m/g;
+const tail = (s: string, n = 3000) => {
+  const clean = s.replace(ANSI, "");
+  return clean.length > n ? "…" + clean.slice(-n) : clean;
+};
 
 function writeEvidence(project: Project, name: string, data: unknown): string {
   const rel = `docs/evidence/${name}.json`;
@@ -70,6 +74,11 @@ export function createExecutors(deps: ExecutorDeps): Record<string, Executor> {
       const commands = (task.params.commands as CheckCommand[] | undefined) ?? [];
       if (commands.length === 0) return { ok: false, retryable: false, error: "no commands configured" };
       const runner = new CommandRunner({ projectRoot: project.workDir });
+      // The latest result is kept under the task id; every attempt also gets its own file so failed runs stay on record after a repair.
+      const record = (payload: unknown): string[] => [
+        writeEvidence(project, task.id, payload),
+        writeEvidence(project, `${task.id}.attempt-${task.retryCount + 1}`, payload),
+      ];
       const results: { name: string; command: string; code: number | null; durationMs: number; timedOut: boolean; output: string }[] = [];
       for (const c of commands) {
         if (signal.aborted) return { ok: false, error: "aborted" };
@@ -81,17 +90,16 @@ export function createExecutors(deps: ExecutorDeps): Record<string, Executor> {
           const msg = e instanceof PolicyError ? `policy: ${e.message}` : e instanceof Error ? e.message : String(e);
           results.push({ name: c.name, command: `${c.cmd} ${c.args.join(" ")}`, code: null, durationMs: 0, timedOut: false, output: msg });
           if (e instanceof PolicyError) {
-            const ev = writeEvidence(project, task.id, { task: task.id, at: new Date().toISOString(), results });
-            return { ok: false, retryable: false, error: msg, artifacts: [ev] };
+            return { ok: false, retryable: false, error: msg, artifacts: record({ task: task.id, attempt: task.retryCount + 1, at: new Date().toISOString(), results }) };
           }
         }
       }
-      const evidence = writeEvidence(project, task.id, { task: task.id, at: new Date().toISOString(), results });
+      const evidence = record({ task: task.id, attempt: task.retryCount + 1, at: new Date().toISOString(), results });
       const failed = results.filter((r) => r.code !== 0);
-      if (failed.length === 0) return { ok: true, artifacts: [evidence], message: `${results.length} checks passed` };
+      if (failed.length === 0) return { ok: true, artifacts: evidence, message: `${results.length} checks passed` };
       return {
         ok: false,
-        artifacts: [evidence],
+        artifacts: evidence,
         error: failed.map((f) => `${f.name} (exit ${f.code}${f.timedOut ? ", timed out" : ""}):\n${f.output}`).join("\n---\n"),
       };
     },
