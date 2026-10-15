@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-15T18:33:39.233Z",
+  "productionUrl": "https://focus-board.pages.dev",
+  "deploymentUrl": "https://365fdff5.focus-board.pages.dev",
+  "e2e": {
+    "baseUrl": "https://focus-board.pages.dev",
+    "passed": 37,
+    "failed": 0,
+    "flaky": 0,
+    "skippedScreenshotGenerators": 12,
+    "resultsFileMentionsLocalServer": false
+  },
+  "versionMatch": {
+    "asset": "index-CAymwNvC.js",
+    "localSha256": "9d14ca4a650661651faea17b4324aa227592ee11fb19d8f7d35127a5ff44a8dc",
+    "liveSha256Equal": true,
+    "method": "curl of the live asset piped to sha256sum, compared with dist/"
+  },
+  "headersObserved": [
+    "content-security-policy",
+    "permissions-policy",
+    "referrer-policy",
+    "x-content-type-options"
+  ],
+  "routesHttpStatus": {
+    "/habits": 200,
+    "/tasks": 200,
+    "/settings": 200,
+    "/no/such/page": 200
+  },
+  "notes": [
+    "SPA fallback serves the app shell for unknown paths; the app renders its own not-found page.",
+    "A missing /assets/* file also returns the app shell with HTTP 200 (Cloudflare SPA fallback); harmless but not a 404."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "provider": "cloudflare-pages",
+  "scope": "cloudflare-pages:focus-board",
+  "ok": true,
+  "url": "https://365fdff5.focus-board.pages.dev",
+  "log": "⛅️ wrangler 4.151.0\n────────────────────\n\n\n\u001b[31mX \u001b[41;31m[\u001b[41;97mERROR\u001b[41;31m]\u001b[0m \u001b[1mThe Pages project \"focus-board\" does not exist.\u001b[0m\n\n  Maybe you intended to deploy a Worker project instead? Workers are the recommended way to deploy all new projects. If so, run `wrangler deploy`.\n  \n  If you are targeting an existing Pages project, verify that the project name is correct and that it exists in your account (the account in use has id [REDACTED]).\n  \n  Otherwise, if you are trying to create a new Pages project, start by running: `wrangler pages project create` (though we strongly recommend using Workers instead).\n\n\n🪵  Logs were written to \"C:\\Users\\Sachidanand Sharma\\AppData\\Roaming\\xdg.config\\.wrangler\\logs\\wrangler-2026-10-15_18-30-58_171.log\"\n--- project create ---\n⛅️ wrangler 4.151.0\n────────────────────\n✨ Successfully created the 'focus-board' project. It will be available at https://focus-board.pages.dev/ once you create your first deployment.\nTo deploy a folder of assets, run 'wrangler pages deploy [directory]'.\n--- deploy retry ---\n\n ⛅️ wrangler 4.151.0\n────────────────────\nUploading... (0/4)\nUploading... (1/4)\nUploading... (3/4)\nUploading... (4/4)\n✨ Success! Uploaded 4 files (6.02 sec)\n\n✨ Uploading _headers\n🌎 Deploying...\n✨ Deployment complete! Take a peek over at https://365fdff5.focus-board.pages.dev"
+}

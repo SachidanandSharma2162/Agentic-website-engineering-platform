@@ -34,7 +34,7 @@ Results below were produced by the platform's `quality` and `security` tasks (ra
 | AC15 no overflow at 375/768/1280 | 12 viewport tests, nav adaptation, 4 visual-integrity regressions |
 | AC16 no console errors, no cross-origin requests, size | E2E hygiene test on every route; build report |
 | AC17 audit, type-check, lint, tests | `quality` and `security` evidence |
-| AC18 live URL returns 200 | **not yet run** (needs deployment) |
+| AC18 live URL returns 200 | platform smoke task (`/` -> 200) plus the full E2E suite re-run against the live URL: 37 passed (`docs/evidence/live-verification.json`) |
 
 ## Defects found and fixed during testing
 
@@ -53,8 +53,13 @@ Lesson recorded: four of the five real defects were visible only in screenshots.
 
 - **Screen readers.** axe and a keyboard walkthrough passed; no manual NVDA/VoiceOver session was run.
 - **Other browsers.** Only Chrome was exercised. Firefox and Safari are untested.
-- **Security headers (CSP etc.).** `public/_headers` is only applied by Cloudflare Pages; `vite preview` ignores it, so the CSP is untested until the production smoke test. A CSP that is too strict could break the app, which is why this is on the smoke-test list.
-- **SPA fallback on Cloudflare.** Verified on `vite preview` only.
 - **GitHub Actions.** The workflow has never run (no remote).
 - **Midnight rollover** is covered by a component test with an injected clock, not in a real browser across midnight.
-- Deployment, Cloudflare token permissions and free-tier behaviour are unverified until credentials exist.
+- Cloudflare free-tier quotas under real traffic (only a single deployment of 4 files was made).
+
+## Verified on the live site (2026-10-15)
+
+- Deployed JS bundle is byte-identical to the approved local build (SHA-256 equal).
+- CSP, Permissions-Policy, Referrer-Policy and X-Content-Type-Options headers are served. The full E2E suite (37 tests: journeys, downloads, axe, keyboard, reduced motion, overflow, console and cross-origin hygiene) passes against `https://focus-board.pages.dev` under those headers, so the CSP does not break the app.
+- Deep links (`/habits`, `/tasks`, `/settings`) and unknown paths return the app (SPA fallback works). Quirk: a missing `/assets/*` file also returns the app shell with HTTP 200 instead of 404.
+- The per-deployment hostname failed its TLS handshake for roughly the first minutes after creation and then worked; the production hostname worked immediately.

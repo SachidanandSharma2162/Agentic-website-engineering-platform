@@ -2,7 +2,7 @@
 
 A calm, private daily planner: tasks with a Today list, habits with streaks, filter and search, JSON export and import. All data stays in your browser (localStorage). No accounts, no analytics, no third-party requests.
 
-Live URL: **not deployed yet** (deployment needs approval at Gates C and D and Cloudflare credentials).
+Live: **https://focus-board.pages.dev** (Cloudflare Pages Free, deployed 2026-10-15 from release candidate `c0ae3ff` plus the adapter fix; see `docs/final-report.md`).
 
 ## Run it
 
