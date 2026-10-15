@@ -19,5 +19,5 @@ export default tseslint.config(
       ],
     },
   },
-  { files: ["tests/e2e/**", "playwright.config.ts", "vite.config.ts"], languageOptions: { globals: { ...globals.node } } },
+  { files: ["tests/e2e/**", "scripts/**", "playwright.config.ts", "vite.config.ts"], languageOptions: { globals: { ...globals.node } } },
 );
