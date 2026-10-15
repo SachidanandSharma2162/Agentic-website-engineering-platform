@@ -1,5 +1,10 @@
 # Security
 
+## Findings from the first live deployment
+
+- A transitive dependency (zod) probed for `eval` support with `new Function("")`. The throw was caught, but the strict CSP (`script-src 'self'`) reported it on every page load. Fixed by configuring the library not to probe (`jitless`), not by loosening the CSP. A unit test and an E2E CSP-violation listener now guard this.
+- Cloudflare API tokens are created with a single permission (Account > Cloudflare Pages > Edit), a short expiry, and are revoked after the deploy. The CLI loads `.env` itself, never prints values, and secret values were searched for in every repo file and state log after the deploy (none found).
+
 ## Command runner (packages/tools)
 
 - Executables are an allowlist: `node`, `npm`, `npx`, `git`. Everything else (curl, shells, python...) is denied. No shell is ever used (`shell: false`); npm and npx are launched through their JS entry points.

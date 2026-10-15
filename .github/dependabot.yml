@@ -1,0 +1,14 @@
+# Weekly dependency update PRs. Written but not yet exercised: it only runs once the repository is on GitHub with Dependabot enabled.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /examples/focus-board
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

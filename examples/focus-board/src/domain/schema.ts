@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { isDayKey } from "./dates.ts";
 
+// zod probes for eval support with `new Function("")`. The throw is swallowed, but a strict Content-Security-Policy
+// (script-src 'self', no 'unsafe-eval') still reports the attempt, which Firefox prints as an error on every page load.
+// jitless skips the probe; validating a few thousand small objects does not need the generated fast path.
+z.config({ jitless: true });
+
 export const LIMITS = {
   titleMax: 120,
   habitNameMax: 60,

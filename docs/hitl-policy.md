@@ -16,5 +16,6 @@
 2. A scoped approval (e.g. `cloudflare-pages:focus-board`) covers only that scope. An approval for another target does not satisfy the gate.
 3. The latest decision wins: a rejection revokes an earlier approval.
 4. Approvals are recorded with `sdlc approve <project> <gate> --by <name>`. `--by` is required. **An approval must reflect an explicit decision by the human owner. The operator/LLM must never record one on their behalf.**
-5. A previously approved plan is not blanket permission for destructive or materially different actions; those need Gate E.
+5. Approvals belong to one release candidate. `sdlc reopen --new-release` revokes the scoped Gate C and D approvals when a deployed site gets a new candidate, so redeploying always needs fresh human approval.
+6. A previously approved plan is not blanket permission for destructive or materially different actions; those need Gate E.
 6. Without credentials, deploy stops with the exact missing variable names. Nothing is faked.

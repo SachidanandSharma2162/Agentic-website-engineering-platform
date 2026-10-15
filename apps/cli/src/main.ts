@@ -41,7 +41,9 @@ const USAGE = `sdlc: agentic website engineering platform
   init <name> "<request>" [--dir examples/<slug>] [--deploy-name <slug>]
   run <project>                       run every task that can run; stops at gates / operator work
   status <project> [--events]         task graph, approvals, deployments
-  reopen  <project> <task> --reason "<why>"   re-run a task and everything downstream after a code change
+  reopen  <project> <task> --reason "<why>" [--new-release]
+                                      re-run a task and everything downstream after a code change;
+                                      --new-release also revokes the Gate C/D approvals of a deployed site
   approve <project> <gate> --by <who> [--scope <s>] [--note <n>]
   reject  <project> <gate> --by <who> [--scope <s>] [--note <n>]
   projects                            list projects
@@ -143,7 +145,7 @@ function cmdReopen(args: ReturnType<typeof parseArgs>): void {
   const store = openStore();
   need(store.getProject(id), id);
   const orch = new Orchestrator({ store, executors: {} });
-  const reset = orch.reopen(id, taskId, reason);
+  const reset = orch.reopen(id, taskId, reason, { newRelease: args.flags["new-release"] === true });
   console.log(`Reopened: ${reset.join(", ")}`);
   store.close();
 }

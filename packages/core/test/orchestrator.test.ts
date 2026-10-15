@@ -153,8 +153,35 @@ describe("retries, blocking, waiting, timeouts", () => {
     store.updateTask(PID, "deploy", { status: "COMPLETED" });
     expect(() => orch.reopen(PID, "build", "  ")).toThrow(/reason/);
     expect(() => orch.reopen(PID, "nope", "why")).toThrow(/Unknown task/);
-    expect(() => orch.reopen(PID, "build", "why")).toThrow(/Gate E/);
+    expect(() => orch.reopen(PID, "build", "why")).toThrow(/new release candidate/);
     expect(store.getTask(PID, "build")?.status).toBe("COMPLETED"); // nothing was changed by the refusals
+  });
+
+  it("a new release candidate revokes the scoped Gate C/D approvals, so redeploying needs fresh human approval", async () => {
+    const SCOPE = "cloudflare-pages:site";
+    let deploys = 0;
+    const orch = setup(
+      { ok, deploy: async () => (deploys++, { ok: true }) },
+      [mk("quality"), mk("deploy", { action: "deploy", dependsOn: ["quality"], gates: ["C", "D"], approvalScope: SCOPE })],
+    );
+    store.recordApproval({ projectId: PID, gate: "C", decision: "approved", by: "human", scope: SCOPE });
+    store.recordApproval({ projectId: PID, gate: "D", decision: "approved", by: "human", scope: SCOPE });
+    expect((await orch.run(PID)).done).toBe(true);
+    expect(deploys).toBe(1);
+
+    expect(() => orch.reopen(PID, "quality", "change")).toThrow(/new release candidate/); // plain reopen still refuses
+    orch.reopen(PID, "quality", "zod jitless fix", { newRelease: true });
+
+    const revoked = store.listApprovals(PID).filter((a) => a.decision === "rejected");
+    expect(revoked.map((a) => [a.gate, a.scope, a.by])).toEqual([["C", SCOPE, "platform:new-release"], ["D", SCOPE, "platform:new-release"]]);
+    const s = await orch.run(PID);
+    expect(deploys).toBe(1); // the old approvals do not carry over to the new candidate
+    expect(s.needsApproval.find((n) => n.taskId === "deploy")?.gates).toEqual(["C", "D"]);
+
+    store.recordApproval({ projectId: PID, gate: "C", decision: "approved", by: "human", scope: SCOPE });
+    store.recordApproval({ projectId: PID, gate: "D", decision: "approved", by: "human", scope: SCOPE });
+    expect((await orch.run(PID)).done).toBe(true);
+    expect(deploys).toBe(2);
   });
 
   it("reopen refuses while an affected task is RUNNING", () => {

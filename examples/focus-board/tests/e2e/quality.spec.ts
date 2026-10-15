@@ -42,6 +42,7 @@ test.describe("accessibility (AC14)", () => {
   test("everything is keyboard operable, and every focusable element shows a visible focus ring", async ({ page }) => {
     await seed(page);
     await page.goto("/tasks");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible(); // Tab only works once the page has rendered
 
     // Walk the whole tab order; each stop must have a visible outline.
     const stops: { tag: string; outline: string; width: string }[] = [];
@@ -167,10 +168,17 @@ test.describe("production build hygiene (AC16)", () => {
       if (!r.url().startsWith("data:") && !r.url().startsWith("blob:") && new URL(r.url()).origin !== origin) problems.push(`cross-origin: ${r.url()}`);
     });
     page.on("response", (r) => r.status() >= 400 && problems.push(`http ${r.status()}: ${r.url()}`));
+    // CSP violations are not always surfaced as console errors (Chrome did not, Firefox did), so listen for the event itself.
+    await page.addInitScript(() => {
+      (window as unknown as { __csp: string[] }).__csp = [];
+      document.addEventListener("securitypolicyviolation", (e) => (window as unknown as { __csp: string[] }).__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
+    });
     await seed(page);
     for (const route of [...ROUTES, "/no-such-page"]) {
       await page.goto(route);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const csp = await page.evaluate(() => (window as unknown as { __csp: string[] }).__csp);
+      if (csp.length) problems.push(`${route}: CSP violations: ${csp.join("; ")}`);
     }
     expect(problems).toEqual([]);
   });
@@ -183,6 +191,7 @@ test.describe("visual integrity", () => {
   test("the progress ring draws an arc proportional to progress, with no stray box", async ({ page }) => {
     await seed(page); // seed data: 1 of 2 pinned tasks done
     await page.goto("/");
+    await expect(page.getByRole("img", { name: "1 of 2 done" })).toBeVisible(); // wait for first render before measuring
     const ring = await page.evaluate(() => {
       const fg = getComputedStyle(document.querySelector(".progress-ring .fg")!);
       return { dash: parseFloat(fg.strokeDasharray), offset: parseFloat(fg.strokeDashoffset), shadow: getComputedStyle(document.querySelector(".progress-ring")!).boxShadow };
@@ -203,6 +212,7 @@ test.describe("visual integrity", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await seed(page);
     await page.goto("/habits");
+    await expect(page.getByRole("heading", { name: "Walk for 20 minutes" })).toBeVisible();
     const { height, lineHeight } = await page.evaluate(() => {
       const h = getComputedStyle(document.querySelector(".habit h2")!);
       return { height: document.querySelector(".habit h2")!.getBoundingClientRect().height, lineHeight: parseFloat(h.lineHeight) };
@@ -214,8 +224,19 @@ test.describe("visual integrity", () => {
 test("on a tablet with little content the top bar keeps its natural height instead of stretching", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
   await page.goto("/"); // empty data: very short page
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const nav = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
   expect(nav!.height).toBeLessThan(90);
   const main = await page.getByRole("main").boundingBox();
   expect(main!.y).toBeLessThan(100); // content starts right under the bar
+});
+
+test("security headers from public/_headers are served (locally by vite preview, in production by Cloudflare Pages)", async ({ page }) => {
+  const res = await page.goto("/");
+  const h = res!.headers();
+  expect(h["content-security-policy"]).toContain("script-src 'self'");
+  expect(h["content-security-policy"]).not.toContain("unsafe-eval");
+  expect(h["x-content-type-options"]).toBe("nosniff");
+  expect(h["referrer-policy"]).toBe("no-referrer");
+  expect(h["permissions-policy"]).toContain("camera=()");
 });

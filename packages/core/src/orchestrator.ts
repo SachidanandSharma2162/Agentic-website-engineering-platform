@@ -79,7 +79,7 @@ export class Orchestrator {
    * quality run. Refuses while anything affected is RUNNING, and refuses when it would silently discard a completed
    * deployment (that is a high-risk action needing its own approval). Returns the ids that were reset.
    */
-  reopen(projectId: string, taskId: string, reason: string): string[] {
+  reopen(projectId: string, taskId: string, reason: string, opts: { newRelease?: boolean } = {}): string[] {
     if (!reason.trim()) throw new Error("a reason is required to reopen a task");
     const tasks = this.store.listTasks(projectId);
     if (!tasks.some((t) => t.id === taskId)) throw new Error(`Unknown task ${taskId}`);
@@ -97,7 +97,24 @@ export class Orchestrator {
     const running = hit.find((t) => t.status === "RUNNING");
     if (running) throw new Error(`cannot reopen: ${running.id} is RUNNING`);
     const deployed = hit.find((t) => t.status === "COMPLETED" && t.gates.some((g) => g === "C" || g === "D"));
-    if (deployed) throw new Error(`cannot reopen: ${deployed.id} already completed under a deployment approval; undoing it needs Gate E approval`);
+    if (deployed && !opts.newRelease) {
+      throw new Error(`cannot reopen: ${deployed.id} already completed under a deployment approval; to ship a new release candidate pass newRelease (CLI: --new-release), which revokes the Gate C/D approvals so the new candidate needs fresh ones`);
+    }
+    if (opts.newRelease) {
+      // The approvals were for the previous candidate. Revoke them (a later rejection wins), so deploying the new
+      // candidate is impossible until a human approves Gates C and D again. The earlier deployment record is kept.
+      for (const t of hit) {
+        if (t.status !== "COMPLETED" || !t.gates.some((g) => g === "C" || g === "D")) continue;
+        for (const gate of ["C", "D"] as const) {
+          if (!t.gates.includes(gate)) continue;
+          this.store.recordApproval({
+            projectId, gate, decision: "rejected", by: "platform:new-release",
+            ...(t.approvalScope ? { scope: t.approvalScope } : {}),
+            note: `revoked for a new release candidate: ${reason}`,
+          });
+        }
+      }
+    }
     for (const t of hit) {
       this.store.updateTask(projectId, t.id, { status: "PLANNED", retryCount: 0, lastError: undefined, blockedReason: undefined, finishedAt: undefined });
     }
