@@ -42,7 +42,7 @@ main{max-width:960px;margin:0 auto;padding:var(--s4) var(--s4) var(--s8)}
 
 /* Cards and buttons */
 .card{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);border:1px solid var(--line)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:48px;padding:0 var(--s5);border-radius:var(--r-pill);border:1.5px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;font-weight:500;text-decoration:none;transition:background .2s var(--ease),transform .15s var(--ease)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:48px;padding:0 var(--s5);border-radius:var(--r-pill);border:1.5px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;font-weight:500;text-decoration:none;transition:transform .15s var(--ease)}
 .btn:hover{background:var(--sage-soft)}
 .btn:active{transform:scale(.98)}
 .btn.primary{background:var(--sage);color:var(--on-sage)}

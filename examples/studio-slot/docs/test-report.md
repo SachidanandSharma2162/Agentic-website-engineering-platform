@@ -43,6 +43,7 @@ Mutation checks (tests proven able to fail): removing the capacity condition fai
 | "Class added." disappeared: the dashboard unmounted while its data reloaded | E2E; the loader now keeps previous data while refreshing |
 | Focus sometimes did not move to the invalid field (moved in `requestAnimationFrame`, before React rendered the error) | an intermittent E2E failure; focus now moves in an effect after commit; 10 of 10 clean loops afterwards |
 | Roster order varied between runs (ties broken by a random id) | a flaky API test; ordering is now deterministic |
+| Intermittent axe `color-contrast` failure (2 of 25 runs in WebKit): a disabled button turning enabled cross-faded its colours for 200 ms and passed through a low-contrast state | repeated runs captured the violation; button colour transitions removed, regression test added; 40 of 40 clean afterwards |
 | Prototype race: navigating away during loading wrote into the wrong screen | found in design review; the real loader ignores and cancels stale requests (component test) |
 | Honeypot response had a different shape from a real success | review; now identical |
 

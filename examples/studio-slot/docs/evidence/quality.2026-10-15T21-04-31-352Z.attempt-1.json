@@ -1,0 +1,47 @@
+{
+  "task": "quality",
+  "attempt": 1,
+  "at": "2026-10-15T21:04:31.351Z",
+  "results": [
+    {
+      "name": "type-check",
+      "command": "npm run typecheck",
+      "code": 0,
+      "durationMs": 3529,
+      "timedOut": false,
+      "output": "> studio-slot@1.0.0 typecheck\n> tsc -b --noEmit"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "code": 0,
+      "durationMs": 3991,
+      "timedOut": false,
+      "output": "> studio-slot@1.0.0 lint\n> eslint ."
+    },
+    {
+      "name": "unit-and-api-tests",
+      "command": "npm test",
+      "code": 0,
+      "durationMs": 7362,
+      "timedOut": false,
+      "output": "> studio-slot@1.0.0 test\n> vitest run\n\n\n RUN  v5.0.5 C:/Users/Sachidanand Sharma/agentic-sdlc-platform/examples/studio-slot\n\n ✓ tests/api/api.test.ts (60 tests) 742ms\n ✓ tests/api/concurrency.test.ts (2 tests) 933ms\n   ✓ capacity under real concurrency (AC4) (2)\n     ✓ 16 separate processes with separate database connections racing for 5 spots: exactly 5 win, the rest are told the class is full 678ms\n ✓ tests/unit/time.test.ts (31 tests) 1071ms\n   ✓ studio wall time to instant (admin adds a class) (19)\n     ✓ round-trips every half hour across both New York transitions, and across a year in Kolkata 1038ms\n ✓ tests/unit/ui.test.tsx (23 tests) 4367ms\n   ✓ booking (AC3) (5)\n     ✓ validates on the client with field errors, moves focus to the first problem, and sends nothing 470ms\n     ✓ books, sends the trimmed values (honeypot empty), and shows the code once 618ms\n     ✓ explains a class that filled up meanwhile, and a closed class up front 396ms\n   ✓ owner (AC9) (6)\n     ✓ converts the studio-time form to the right UTC instant (06:30 in Kolkata is 01:00 UTC) and keeps the confirmation visible 660ms\n     ✓ rejects a past start, an impossible capacity and an empty title on the client 484ms\n   ✓ cancelling a booking (AC6) (1)\n     ✓ shows the same non-revealing message for any wrong code, and success clears the form 436ms\n\n Test Files  4 passed (4)\n      Tests  116 passed (116)\n   Start at  17:02:54\n   Duration  6.52s (tests 73%, environment 13%, import 5%, transform 5%, setup 2%)\n\n\nstderr | tests/api/api.test.ts > operations > reports health, and refuses to start with an invalid studio time zone\nconfig_error STUDIO_TIMEZONE \"Mars/Olympus\" is not a valid IANA time zone\n\nstderr | tests/api/api.test.ts > operations > maps a free-tier daily-limit failure to a friendly 503 and logs no personal data\nunhandled_error D1 daily limit exceeded for this account\n\nstderr | tests/api/api.test.ts > operations > maps any other database failure to a generic 503 without leaking details\nunhandled_error SQLITE_CORRUPT at secret_table"
+    },
+    {
+      "name": "production-build",
+      "command": "npm run build",
+      "code": 0,
+      "durationMs": 4175,
+      "timedOut": false,
+      "output": "> studio-slot@1.0.0 build\n> tsc -b && vite build\n\nvite v8.3.4 building client environment for production...\ntransforming...\n✓ 203 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.67 kB │ gzip:   0.39 kB\ndist/assets/index-z3AmSQrv.css    7.05 kB │ gzip:   2.30 kB\ndist/assets/index-CQFnyBez.js   368.23 kB │ gzip: 113.73 kB\n\n✓ built in 199ms"
+    },
+    {
+      "name": "e2e-chrome-firefox-webkit",
+      "command": "npm run e2e:all",
+      "code": 1,
+      "durationMs": 85699,
+      "timedOut": false,
+      "output": "…waiting for getByLabel('Class')\n\n\n       at helpers.ts:62\n\n      60 | export async function selectClass(page: Page, title: string): Promise<void> {\n      61 |   const select = page.getByLabel(\"Class\");\n    > 62 |   await expect(select).toBeEnabled(); // the list loads asynchronously\n         |                        ^\n      63 |   const options = async () => select.locator(\"option\").allInnerTexts();\n      64 |   await expect.poll(async () => (await options()).some((t) => t.includes(title)), { message: `\"${title}\" should be in the class list` }).toBe(true);\n      65 |   await select.selectOption({ index: (await options()).findIndex((t) => t.includes(title)) });\n        at selectClass (C:\\Users\\Sachidanand Sharma\\agentic-sdlc-platform\\examples\\studio-slot\\tests\\e2e\\helpers.ts:62:24)\n        at C:\\Users\\Sachidanand Sharma\\agentic-sdlc-platform\\examples\\studio-slot\\tests\\e2e\\journeys.spec.ts:27:11\n\n    Error Context: test-results\\journeys-visitor-journey-A-e56b2-e-then-cancel-with-the-code-webkit\\error-context.md\n\n    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────\n    test-results\\journeys-visitor-journey-A-e56b2-e-then-cancel-with-the-code-webkit\\trace.zip\n    Usage:\n\n        npx playwright show-trace test-results\\journeys-visitor-journey-A-e56b2-e-then-cancel-with-the-code-webkit\\trace.zip\n\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n  2) [webkit] › tests\\e2e\\quality.spec.ts:224:3 › responsive layout (AC13) › navigation pills share one row on a phone \n\n    Error: expect(received).toBe(expected) // Object.is equality\n\n    Expected: 1\n    Received: 0\n\n      226 |     await page.goto(\"/\");\n      227 |     const tops = await page.locator(\"nav a\").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));\n    > 228 |     expect(new Set(tops).size).toBe(1);\n          |                                ^\n      229 |   });\n      230 | });\n      231 |\n        at C:\\Users\\Sachidanand Sharma\\agentic-sdlc-platform\\examples\\studio-slot\\tests\\e2e\\quality.spec.ts:228:32\n\n    Error Context: test-results\\quality-responsive-layout--c34c1-ls-share-one-row-on-a-phone-webkit\\error-context.md\n\n    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────\n    test-results\\quality-responsive-layout--c34c1-ls-share-one-row-on-a-phone-webkit\\trace.zip\n    Usage:\n\n        npx playwright show-trace test-results\\quality-responsive-layout--c34c1-ls-share-one-row-on-a-phone-webkit\\trace.zip\n\n    ────────────────────────────────────────────────────────────────────────────────────────────────\n\n  2 failed\n    [webkit] › tests\\e2e\\journeys.spec.ts:6:3 › visitor journey (AC1, AC3, AC6, AC7) › see a class, book it, get a code and a calendar file, then cancel with the code \n    [webkit] › tests\\e2e\\quality.spec.ts:224:3 › responsive layout (AC13) › navigation pills share one row on a phone \n  9 skipped\n  121 passed (1.4m)"
+    }
+  ]
+}

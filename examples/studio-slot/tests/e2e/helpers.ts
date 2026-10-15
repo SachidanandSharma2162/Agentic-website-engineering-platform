@@ -58,7 +58,7 @@ export async function ownerSignIn(page: Page): Promise<void> {
 
 /** Choose the class with this title in the cancel form's select. */
 export async function selectClass(page: Page, title: string): Promise<void> {
-  const select = page.getByLabel("Class");
+  const select = page.getByLabel("Class", { exact: true });
   await expect(select).toBeEnabled(); // the list loads asynchronously
   const options = async () => select.locator("option").allInnerTexts();
   await expect.poll(async () => (await options()).some((t) => t.includes(title)), { message: `"${title}" should be in the class list` }).toBe(true);

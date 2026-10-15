@@ -59,7 +59,7 @@ Colour is never the only signal: availability is a word, current page is a fille
 | CodeBox | one-line cancellation code, selectable |
 
 ## Motion
-Cards rise 8 px and fade in (400 ms); skeleton shimmer; a 5 s breathing circle on the confirmation. Only transform and opacity animate. `prefers-reduced-motion: reduce` removes all animation and transitions.
+Cards rise 8 px and fade in (400 ms); skeleton shimmer; a 5 s breathing circle on the confirmation. Only transform and opacity animate; buttons animate only their press (transform), never their colours, because a colour cross-fade passes through low-contrast states (found by an intermittent axe failure). `prefers-reduced-motion: reduce` removes all animation and transitions.
 
 ## Responsive rules
 Mobile first; content max width 960 px; breakpoint at 640 px where cards stack (time, then title, then badge and a full-width Book button) and the form grid becomes one column. The nav pills share a row at every width. No fixed-width text containers.

@@ -157,6 +157,15 @@ test.describe("accessibility (AC12)", () => {
     await expect(trigger).toBeFocused();
   });
 
+  test("buttons never cross-fade their colours (halfway through, white text on a pale background fails contrast)", async ({ page, request }) => {
+    const c = await createClass(request);
+    await page.goto("/");
+    await expect(card(page, c.title)).toBeVisible();
+    const props = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".btn")].map((b) => getComputedStyle(b).transitionProperty));
+    expect(props.length).toBeGreaterThan(0);
+    for (const p of props) expect(p, "only transform may animate").not.toMatch(/all|color|background|border/);
+  });
+
   test("prefers-reduced-motion disables animation and transitions", async ({ browser, request }) => {
     const c = await createClass(request);
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
