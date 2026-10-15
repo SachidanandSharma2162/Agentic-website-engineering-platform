@@ -17,7 +17,7 @@ npm start          # site + API on http://127.0.0.1:8788, SQLite file in .data/,
 ```
 npm run typecheck
 npm run lint
-npm test           # 116 unit, component and API tests (real SQLite; includes multi-process concurrency)
+npm test           # 117 unit, component and API tests (real SQLite; includes multi-process concurrency)
 npm run e2e        # Playwright against the built site and API (Chrome)
 npm run e2e:all    # the same in Chrome, Firefox and WebKit (npx playwright install firefox webkit once)
 ```

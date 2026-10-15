@@ -13,6 +13,8 @@ export const LIMITS = {
   durationMin: 15,
   durationMax: 240,
   bookingWindowDays: 14,
+  /** How far ahead the owner's list reaches. Classes can be added up to a year ahead; they appear here as their date approaches. */
+  adminWindowDays: 60,
   retentionDays: 90,
   maxBodyBytes: 4096,
 } as const;

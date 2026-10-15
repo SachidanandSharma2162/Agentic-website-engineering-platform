@@ -56,12 +56,16 @@ export async function cancelClass(ctx: Ctx, id: string): Promise<void> {
   if (r.changes === 0) throw new ServiceError("class_not_found", 404, "That class does not exist.");
 }
 
-/** Owner view: classes from yesterday onwards with their rosters. This is the only place names and emails leave the database. */
+/**
+ * Owner view: classes from yesterday up to 60 days ahead, with their rosters. The window keeps the page (and the database
+ * reads) small for a studio that schedules far ahead. This is the only place names and emails leave the database.
+ */
 export async function listAdminClasses(ctx: Ctx): Promise<AdminClassView[]> {
   const since = ctx.now() - DAY;
-  const rows = await ctx.db.all<ClassRow>(`${SELECT} WHERE c.starts_at >= ?1 ORDER BY c.starts_at, c.title, c.id`, [since]);
+  const until = ctx.now() + LIMITS.adminWindowDays * DAY;
+  const rows = await ctx.db.all<ClassRow>(`${SELECT} WHERE c.starts_at >= ?1 AND c.starts_at < ?2 ORDER BY c.starts_at, c.title, c.id`, [since, until]);
   const people = await ctx.db.all<{ class_id: string; name: string; email: string }>(
-    "SELECT class_id, name, email FROM bookings WHERE class_id IN (SELECT id FROM classes WHERE starts_at >= ?1) ORDER BY created_at, rowid", [since],
+    "SELECT class_id, name, email FROM bookings WHERE class_id IN (SELECT id FROM classes WHERE starts_at >= ?1 AND starts_at < ?2) ORDER BY created_at, rowid", [since, until],
   );
   const byClass = new Map<string, { name: string; email: string }[]>();
   for (const p of people) (byClass.get(p.class_id) ?? byClass.set(p.class_id, []).get(p.class_id)!).push({ name: p.name, email: p.email });

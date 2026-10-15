@@ -315,6 +315,17 @@ describe("owner classes (AC9)", () => {
     expect(r.body.classes[0]).toMatchObject({ cancelled: true, roster: [{ name: "Asha", email: "a@example.com" }, { name: "Bala", email: "b@example.com" }] });
   });
 
+  it("the owner list reaches 60 days ahead, so far-future classes appear only as their date approaches", async () => {
+    const t = makeApp();
+    await t.addClass({ title: "Soon", inMs: 5 * DAY });
+    await t.addClass({ title: "Far", inMs: 61 * DAY });
+    const a = await t.admin();
+    expect((await a.call("GET", "/api/admin/classes")).body.classes.map((c: { title: string }) => c.title)).toEqual(["Soon"]);
+    t.clock.t += 3 * DAY; // "Far" is now 58 days away
+    expect((await (await t.admin()).call("GET", "/api/admin/classes")).body.classes.map((c: { title: string }) => c.title)).toEqual(["Soon", "Far"]);
+    expect((await t.call("GET", "/api/classes")).body.classes.map((c: { title: string }) => c.title)).toEqual(["Soon"]); // the public window is unchanged (14 days)
+  });
+
   it("cancelling is repeatable, and an unknown class is 404", async () => {
     const t = makeApp();
     const c = await t.addClass();

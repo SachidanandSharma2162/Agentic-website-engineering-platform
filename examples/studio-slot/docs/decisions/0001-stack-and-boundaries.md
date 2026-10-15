@@ -7,7 +7,7 @@ The whole API is one function from `Request` to `Response` (`server/app.ts`). Cl
 
 ## Why
 - Tests run the real handler against real SQLite, including multi-process concurrency, without any Cloudflare account.
-- The same SQL and handler were then run unchanged on the real Pages Functions runtime with a local D1 (workerd): all 41 E2E tests pass there too, so the abstraction is not hiding a behavioural difference we know of.
+- The same SQL and handler were then run unchanged on the real Pages Functions runtime with a local D1 (workerd): all 42 E2E tests pass there too, so the abstraction is not hiding a behavioural difference we know of.
 - Capacity, uniqueness and cascade-delete are database constraints, not application checks.
 
 ## Consequences

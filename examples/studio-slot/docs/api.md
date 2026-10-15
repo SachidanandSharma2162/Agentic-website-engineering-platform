@@ -50,7 +50,7 @@ Body `{ "passphrase" }`. `200` and a `Set-Cookie` on success; `401 unauthorized`
 `200`, clears the cookie.
 
 ### `GET /api/admin/classes`
-Classes from yesterday onwards with `roster: [{ name, email }]`. This is the only place names and emails leave the database. Also deletes classes (and their bookings) that started more than 90 days ago.
+Classes from yesterday up to 60 days ahead (so the page stays small for a studio that schedules far in advance; later classes appear as their date approaches) with `roster: [{ name, email }]`. This is the only place names and emails leave the database. Also deletes classes (and their bookings) that started more than 90 days ago.
 
 ### `POST /api/admin/classes`
 Body `{ "title", "startsAt", "durationMin", "capacity" }`: title 1-60 characters, `startsAt` in the future and within a year, duration 15-240, capacity 1-100 (integers). `201` with the class, or `400 validation` with `fields`.

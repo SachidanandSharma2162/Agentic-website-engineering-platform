@@ -6,9 +6,9 @@ Re-run with `npm run typecheck && npm run lint && npm test && npm run build && n
 | Check | Result |
 |---|---|
 | Type-check (`tsc -b`, strict), lint | pass |
-| Unit, component and API tests (Vitest, real SQLite) | 116 passed: 31 time zone, 23 component, 60 API, 2 multi-process concurrency |
-| End-to-end (Playwright, built site + API + SQLite) | 41 tests in Chrome, Firefox and WebKit: 123 of 123 passed |
-| Same E2E suite on the real Cloudflare Pages Functions runtime with a local D1 (`wrangler pages dev`) | 123 of 123 passed |
+| Unit, component and API tests (Vitest, real SQLite) | 117 passed: 31 time zone, 23 component, 61 API, 2 multi-process concurrency |
+| End-to-end (Playwright, built site + API + SQLite) | 42 tests in Chrome, Firefox and WebKit: 126 of 126 passed |
+| Same E2E suite on the real Cloudflare Pages Functions runtime with a local D1 (`wrangler pages dev`, fresh database) | 126 of 126 passed |
 | Concurrency on that runtime | 30 simultaneous bookings for 5 seats gave exactly 5 successes, 3 runs out of 3 |
 | Production build | pass; JavaScript 113.7 KB gzipped (budget 200 KB), CSS 2.3 KB |
 | `npm audit --audit-level=high` | 0 vulnerabilities |
@@ -24,7 +24,7 @@ Re-run with `npm run typecheck && npm run lint && npm test && npm run build && n
 | AC6 cancelling | API `cancelling` (5: identical answers for wrong code/class/unknown/garbage, code works once, hash only); E2E |
 | AC7 calendar file | `time.test.ts` (well-formed, UTC, escaping, no personal data); E2E real download |
 | AC8 owner authentication | API: every owner route 401 without a session, forged/tampered/expired cookie, cookie flags, CSRF header, fails closed, secrets never in responses |
-| AC9 owner classes | API validation (9 cases), roster, cancel keeps bookings; component conversion of 06:30 IST to 01:00 UTC; E2E add, roster, cancel |
+| AC9 owner classes | API validation (9 cases), roster, cancel keeps bookings, owner list bounded to 60 days; component conversion of 06:30 IST to 01:00 UTC; E2E add, roster, cancel |
 | AC10 abuse protection | API: 429 with Retry-After, other clients unaffected, window reopens, sign-in and cancel limits, no address stored; E2E messages for 429 and outages |
 | AC11 hostile input | API: markup and SQL metacharacters stored as text and database intact, oversize/415/malformed JSON, 404/405, uncacheable responses |
 | AC12 accessibility | axe on schedule (all states), booking (empty and error), confirmation, cancel, owner (sign-in, dashboard with roster, errors, dialog), not-found and outage; keyboard-only booking and cancelling; focus rings on every tab stop (Chrome, Firefox); dialog focus handling; reduced motion |
@@ -46,6 +46,8 @@ Mutation checks (tests proven able to fail): removing the capacity condition fai
 | Intermittent axe `color-contrast` failure (2 of 25 runs in WebKit): a disabled button turning enabled cross-faded its colours for 200 ms and passed through a low-contrast state | repeated runs captured the violation; button colour transitions removed, regression test added; 40 of 40 clean afterwards |
 | Prototype race: navigating away during loading wrote into the wrong screen | found in design review; the real loader ignores and cancels stale requests (component test) |
 | Honeypot response had a different shape from a real success | review; now identical |
+
+| Owner page listed every future class: 534 classes in one page after many test runs made an accessibility scan time out (the API itself answered in 26 ms) | a timeout on the real-runtime run; the owner list is now limited to the next 60 days (test added) |
 
 Several failures were mistakes in my own tests (ambiguous locators, assertions on the wrong wording, racing page render); each was fixed in the test, not by weakening an assertion.
 
