@@ -2,7 +2,7 @@
 
 A reusable engineering workflow for turning a natural-language website request into a tested, deployed site, with human approval gates at every important decision.
 
-**Status: milestones 1-7 done and milestone 8 partly done. The first site (Focus Board) is built, tested and live at https://focus-board.pages.dev; a newer release candidate is validated but not yet deployed.** See [plans/implementation-plan.md](plans/implementation-plan.md) for what exists, what is verified and what is not yet done.
+**Status: milestones 1-7 done and milestone 8 partly done. The first site (Focus Board) is live at https://focus-board.pages.dev (a newer candidate is validated and also deployed); a second, harder site (Studio Slot, a booking system with a backend and database) is built and validated and waiting at Gate C.** See [plans/implementation-plan.md](plans/implementation-plan.md) for what exists, what is verified and what is not yet done.
 
 ## What it is (and is not)
 

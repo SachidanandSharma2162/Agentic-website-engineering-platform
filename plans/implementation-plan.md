@@ -10,7 +10,7 @@ Approved at Gate A (platform plan), scope: milestones 1-6 first; milestones 7-8 
 | M4 First complete website (Focus Board) | **Built, tested and deployed: https://focus-board.pages.dev** | Gates A' and B approved; 116 unit/component + 37 E2E tests, axe clean, 143 KB gzip JS; see examples/focus-board/docs/test-report.md |
 | M5 Testing and self-healing on the site | **Demonstrated once** | one deliberately injected defect detected by the quality gate, repaired by the operator, full regression re-run: examples/focus-board/docs/self-heal-report.md |
 | M6 Deployment adapters, live deploy | **Cloudflare Pages deployed for real** (Gates C and D approved, scoped to `cloudflare-pages:focus-board`); adapter now creates the missing project on first deploy | evidence: examples/focus-board/docs/evidence/ (deploy-*, smoke.json, live-verification.json). Only one provider exists; others are untested |
-| M7 Generalization | **Done (templates, not a second site)** | 9 category templates, 16 feature modules with acceptance templates and Gate E flags, template-driven spec drafts, optional backend task, `sdlc templates`; 9-request generalisation matrix test; CLI run on two different requests. No second full website has been built with the platform yet |
+| M7 Generalization | **Done, with a second site built from it (Studio Slot, a booking system with a backend and database; at Gate C, not deployed)** | 9 category templates, 16 feature modules with acceptance templates and Gate E flags, template-driven spec drafts, optional backend task, `sdlc templates`; 9-request generalisation matrix test; CLI run on two different requests. Studio Slot (examples/studio-slot) exercised the backend task, per-route smoke checks and `reopen`; building it exposed platform gaps (see below) |
 | M8 Hardening | **Partly done** | done: crash recovery verified with a killed process, approval revocation for new releases, cross-browser E2E, production headers in local preview, CSP finding fixed, richer smoke checks, Dependabot config. Not done: see "Not yet verified" |
 
 ## Platform changes made while building the first site
@@ -19,6 +19,12 @@ Approved at Gate A (platform plan), scope: milestones 1-6 first; milestones 7-8 
 - `reopen`: re-run a task and its dependents after a code change; requires a reason; refuses to undo a completed deployment.
 - Per-attempt, timestamped evidence files; terminal colour codes stripped from evidence.
 - Root vitest scoped to platform packages; example sites are standalone projects with their own lockfile.
+
+## Second site: Studio Slot (booking system)
+
+Gates A and B approved. Built on Cloudflare Pages Functions + D1 with one API handler shared by production, a Node dev server and the tests. Final candidate validated through the platform: 117 unit/component/API tests (including a 16-process concurrency race), 129 E2E runs in Chrome, Firefox and WebKit, 0 audit findings; the same E2E suite also passes on the real Pages Functions runtime with a local D1. GitHub CI is green on Linux. Not deployed: needs Gates C and D plus Gate E items (D1 database, secrets, token with D1 permission). See examples/studio-slot/docs/test-report.md.
+
+Lessons that changed the process: (1) CI on a different OS found a font-dependent layout bug that every local run missed; (2) repeating flaky tests many times found three real defects (focus timing, animation contrast, deterministic ordering); (3) running against the real runtime (wrangler) before deploying is cheap and caught a Pages behaviour difference; (4) child processes from background servers must be stopped explicitly.
 
 ## Release candidate 2 (Focus Board)
 
