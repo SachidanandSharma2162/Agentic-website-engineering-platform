@@ -1,6 +1,6 @@
 # Release report: Studio Slot
 
-Generated 2026-10-15T21:20:01.653Z from recorded platform state.
+Generated 2026-10-15T21:28:31.938Z from recorded platform state.
 
 ## Task status
 
@@ -12,7 +12,7 @@ Generated 2026-10-15T21:20:01.653Z from recorded platform state.
 | implement | frontend | COMPLETED | 0 |
 | backend | backend | COMPLETED | 0 |
 | tests | qa | COMPLETED | 0 |
-| quality | qa | COMPLETED | 1 |
+| quality | qa | COMPLETED | 0 |
 | security | security | COMPLETED | 0 |
 | release | orchestrator | RUNNING | 0 |
 | deploy | devops | PLANNED | 0 |
@@ -28,8 +28,10 @@ Generated 2026-10-15T21:20:01.653Z from recorded platform state.
 
 - docs/evidence/quality.2026-10-15T21-04-31-352Z.attempt-1.json
 - docs/evidence/quality.2026-10-15T21-20-01-646Z.attempt-2.json
+- docs/evidence/quality.2026-10-15T21-28-30-413Z.attempt-1.json
 - docs/evidence/quality.json
 - docs/evidence/security.2026-10-15T21-04-33-323Z.attempt-1.json
+- docs/evidence/security.2026-10-15T21-28-31-929Z.attempt-1.json
 - docs/evidence/security.json
 
 ## Proposed deployment
