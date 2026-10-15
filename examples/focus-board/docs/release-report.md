@@ -1,6 +1,6 @@
 # Release report: Focus Board
 
-Generated 2026-10-15T17:43:24.151Z from recorded platform state.
+Generated 2026-10-15T17:48:04.612Z from recorded platform state.
 
 ## Task status
 
@@ -25,10 +25,10 @@ Generated 2026-10-15T17:43:24.151Z from recorded platform state.
 
 ## Evidence files
 
-- docs/evidence/quality.attempt-1.json
-- docs/evidence/quality.attempt-2.json
+- docs/evidence/quality.2026-10-15T17-44-33-935Z.attempt-1.json
+- docs/evidence/quality.2026-10-15T17-45-23-457Z.attempt-2.json
+- docs/evidence/quality.2026-10-15T17-48-04-602Z.attempt-1.json
 - docs/evidence/quality.json
-- docs/evidence/security.attempt-1.json
 - docs/evidence/security.json
 
 ## Proposed deployment

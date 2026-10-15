@@ -378,3 +378,30 @@ describe("ProgressRing", () => {
     expect(parseFloat(arc.style.strokeDashoffset)).toBeCloseTo(circumference / 2, 3);
   });
 });
+
+describe("day rollover (R1)", () => {
+  it("moves to the new local day when the tab regains focus after midnight, and checks in against the new day", async () => {
+    let current = new Date(2025, 5, 15, 23, 59, 0);
+    const movingClock = { now: () => current };
+    const adapter = createMemoryAdapter(seed({ habits: [{ id: "h", name: "Walk", checkIns: ["2025-06-15"] }] }));
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <App storage={adapter} clock={movingClock} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Sunday, June 15");
+    expect(screen.getByRole("checkbox", { name: /Check in “Walk” for today/ })).toBeChecked();
+
+    current = new Date(2025, 5, 16, 0, 1, 0); // midnight passes while the tab stays open
+    act(() => void window.dispatchEvent(new Event("focus")));
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Monday, June 16");
+    const box = screen.getByRole("checkbox", { name: /Check in “Walk” for today/ });
+    expect(box).not.toBeChecked(); // a new day, not yet checked in
+    expect(screen.getByText("1 day streak")).toBeInTheDocument(); // yesterday's check-in still counts
+
+    await user.click(box);
+    expect(adapter.snapshot().habits[0]?.checkIns).toEqual(["2025-06-15", "2025-06-16"]);
+    expect(screen.getByText("2 day streak")).toBeInTheDocument();
+  });
+});
