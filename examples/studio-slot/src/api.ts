@@ -64,6 +64,7 @@ export const api = {
   cancelBooking: (input: { classId: string; code: string }, signal?: AbortSignal) => request<{ ok: true }>("POST", "/api/bookings/cancel", input, signal),
   login: (passphrase: string, signal?: AbortSignal) => request<{ ok: true }>("POST", "/api/admin/login", { passphrase }, signal),
   logout: (signal?: AbortSignal) => request<{ ok: true }>("POST", "/api/admin/logout", {}, signal),
+  session: (signal?: AbortSignal) => request<{ signedIn: boolean }>("GET", "/api/admin/session", undefined, signal),
   adminClasses: (signal?: AbortSignal) => request<AdminClassesResponse>("GET", "/api/admin/classes", undefined, signal),
   addClass: (input: { title: string; startsAt: number; durationMin: number; capacity: number }, signal?: AbortSignal) => request<ClassView>("POST", "/api/admin/classes", input, signal),
   cancelClass: (id: string, signal?: AbortSignal) => request<{ ok: true }>("POST", `/api/admin/classes/${encodeURIComponent(id)}/cancel`, {}, signal),

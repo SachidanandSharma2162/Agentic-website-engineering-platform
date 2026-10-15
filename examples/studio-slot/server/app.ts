@@ -71,6 +71,7 @@ const ALLOWED: Record<string, string> = {
   "/api/bookings/cancel": "POST",
   "/api/admin/login": "POST",
   "/api/admin/logout": "POST",
+  "/api/admin/session": "GET",
 };
 
 /** The whole API as one function from Request to Response, so Pages Functions, the dev server and tests all run the same code. */
@@ -119,6 +120,10 @@ export async function handle(req: Request, env: Env, opts: HandleOptions = {}): 
       const { passphrase } = await readJson(req, LoginInput);
       if (!(await passphraseMatches(ctx.config, passphrase))) throw new ServiceError("unauthorized", 401, "That passphrase isn't right.");
       return json(200, { ok: true }, {}, [await createSessionCookie(ctx.config, ctx.now())]);
+    }
+    if (path === "/api/admin/session" && method === "GET") {
+      // Lets the owner page ask "am I signed in?" without a failing request (a 401 would be logged as a console error).
+      return json(200, { signedIn: await hasValidSession(ctx.config, req.headers.get("cookie"), ctx.now()) });
     }
     if (path === "/api/admin/logout" && method === "POST") {
       await requireAdmin(ctx, req, { changing: true });

@@ -162,8 +162,8 @@ test.describe("owner (AC8, AC9)", () => {
     await expect(page.getByText("Pick a date.")).toBeVisible();
     await expect(page.getByText("Pick a start time.")).toBeVisible();
 
-    await page.getByLabel("Title").fill(title);
-    await page.getByLabel("Date").fill(tomorrow);
+    await page.getByLabel("Title", { exact: true }).fill(title);
+    await page.getByLabel("Date", { exact: true }).fill(tomorrow);
     await page.getByLabel(/Start \(studio time/).fill("18:30");
     await page.getByLabel("Capacity").fill("3");
     await page.getByRole("button", { name: "Add class" }).click();
@@ -210,8 +210,8 @@ test.describe("owner (AC8, AC9)", () => {
 
   test("a class cannot be added in the past", async ({ page }) => {
     await ownerSignIn(page);
-    await page.getByLabel("Title").fill("Back in time");
-    await page.getByLabel("Date").fill("2020-01-01");
+    await page.getByLabel("Title", { exact: true }).fill("Back in time");
+    await page.getByLabel("Date", { exact: true }).fill("2020-01-01");
     await page.getByLabel(/Start \(studio time/).fill("10:00");
     await page.getByRole("button", { name: "Add class" }).click();
     await expect(page.getByText("The class must start in the future.")).toBeVisible();

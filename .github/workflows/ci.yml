@@ -40,3 +40,26 @@ jobs:
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run e2e:all
       - run: npm audit --audit-level=high
+  studio-slot:
+    # Booking site: API and database tests, then the E2E suite in Chromium, Firefox and WebKit against the built site.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/studio-slot
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: examples/studio-slot/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e:all
+      - run: npm audit --audit-level=high

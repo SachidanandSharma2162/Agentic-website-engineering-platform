@@ -12,6 +12,8 @@ const PORT = 8789;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  // Three browsers at once overload a typical machine and cause timeouts that are not real failures.
+  workers: all ? 3 : undefined,
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [["list"], ["json", { outputFile: "test-results/e2e.json" }]],

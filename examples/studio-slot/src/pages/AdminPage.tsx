@@ -1,28 +1,37 @@
 import { useRef, useState, type FormEvent } from "react";
 import { ClassInput, LIMITS, type AdminClassView } from "../../shared/schema.ts";
 import { dayLabel, formatTime, zonedWallTimeToUtc, zoneAbbr } from "../../shared/time.ts";
-import { api, ApiError, isAbort } from "../api.ts";
+import { api, ApiError, isAbort, type AdminClassesResponse } from "../api.ts";
 import { useLoad } from "../hooks.ts";
 import { Badge } from "../ui/ClassBits.tsx";
 import { useConfirm } from "../ui/Confirm.tsx";
-import { Field, focusFirstInvalid } from "../ui/Field.tsx";
+import { Field, useFocusInvalid } from "../ui/Field.tsx";
 import { Notice, ProblemNotice } from "../ui/Notice.tsx";
 
 const unauthorized = (e: unknown): boolean => e instanceof ApiError && e.code === "unauthorized";
 
-const loadAdminClasses = (signal: AbortSignal) => api.adminClasses(signal);
+type AdminState = { signedIn: false } | { signedIn: true; data: AdminClassesResponse };
+
+/** Ask whether the owner is signed in (a plain 200 either way), and only then load the classes. */
+async function loadAdmin(signal: AbortSignal): Promise<AdminState> {
+  if (!(await api.session(signal)).signedIn) return { signedIn: false };
+  try {
+    return { signedIn: true, data: await api.adminClasses(signal) };
+  } catch (e) {
+    if (unauthorized(e)) return { signedIn: false }; // the session ended between the two calls
+    throw e;
+  }
+}
 
 export function AdminPage() {
-  const { state, reload } = useLoad(loadAdminClasses);
+  const { state, reload } = useLoad(loadAdmin);
   const [status, setStatus] = useState<string | null>(null);
 
   if (state.status === "loading") return <div className="skel" aria-busy="true" aria-label="Checking sign-in" />;
-  if (state.status === "error" && unauthorized(state.error)) return <Login onDone={() => { setStatus(null); reload(); }} status={status} />;
   if (state.status === "error") {
     return (
       <>
         <ProblemNotice error={state.error} />
-        {state.error instanceof ApiError && state.error.status === 503 && state.error.code === "unavailable" && <Notice>{state.error.message}</Notice>}
         <p style={{ marginTop: 16 }}>
           <button type="button" className="btn" onClick={reload}>
             Try again
@@ -31,7 +40,10 @@ export function AdminPage() {
       </>
     );
   }
-  return <Dashboard data={state.data} reload={reload} onSignedOut={() => { setStatus("You have been signed out."); reload(); }} />;
+  if (!state.data.signedIn) {
+    return <Login status={status} onDone={() => { setStatus(null); reload(); }} />;
+  }
+  return <Dashboard data={state.data.data} reload={reload} onSignedOut={() => { setStatus("You have been signed out."); reload(); }} />;
 }
 
 function Login({ onDone, status }: { onDone: () => void; status: string | null }) {
@@ -39,6 +51,7 @@ function Login({ onDone, status }: { onDone: () => void; status: string | null }
   const [problem, setProblem] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const form = useRef<HTMLFormElement>(null);
+  const focusInvalid = useFocusInvalid(form);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,7 +60,7 @@ function Login({ onDone, status }: { onDone: () => void; status: string | null }
     setProblem(null);
     if (!passphrase) {
       setError("Please enter the passphrase.");
-      focusFirstInvalid(form.current);
+      focusInvalid();
       return;
     }
     setError(undefined);
@@ -60,7 +73,7 @@ function Login({ onDone, status }: { onDone: () => void; status: string | null }
       setBusy(false);
       if (unauthorized(err)) {
         setError((err as ApiError).message);
-        focusFirstInvalid(form.current);
+        focusInvalid();
       } else setProblem(err);
     }
   };
@@ -93,6 +106,7 @@ function Dashboard({ data, reload, onSignedOut }: { data: { studioTimezone: stri
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const form = useRef<HTMLFormElement>(null);
+  const focusInvalid = useFocusInvalid(form);
 
   const handleFailure = (err: unknown) => {
     if (isAbort(err)) return;
@@ -127,7 +141,7 @@ function Dashboard({ data, reload, onSignedOut }: { data: { studioTimezone: stri
     setStatus(null);
     if (Object.keys(errors).length) {
       setFields(errors);
-      focusFirstInvalid(form.current);
+      focusInvalid();
       return;
     }
     setFields({});
@@ -140,7 +154,7 @@ function Dashboard({ data, reload, onSignedOut }: { data: { studioTimezone: stri
     } catch (err) {
       if (err instanceof ApiError && Object.keys(err.fields).length) {
         setFields(Object.fromEntries(Object.entries(err.fields).map(([k, v]) => [k === "startsAt" ? "date" : k === "durationMin" ? "duration" : k, v])));
-        focusFirstInvalid(form.current);
+        focusInvalid();
       } else handleFailure(err);
     } finally {
       setBusy(false);

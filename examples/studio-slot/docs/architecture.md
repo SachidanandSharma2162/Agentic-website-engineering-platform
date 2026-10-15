@@ -50,7 +50,7 @@ WHERE (SELECT cancelled FROM classes WHERE id = ?2) = 0
 | GET `/api/classes` | public | next 14 days with spots left |
 | POST `/api/bookings` | public, rate limited | create booking; returns booking id and one-time cancellation code |
 | POST `/api/bookings/cancel` | public (needs code), rate limited | cancel by class id and code |
-| GET `/api/bookings/:id/ics` | public (needs code) | calendar file |
+| GET `/api/admin/session` | public | whether the owner is signed in (always 200, so no failing request) |
 | POST `/api/admin/login` | passphrase, rate limited | start a session |
 | POST `/api/admin/logout` | session | end it |
 | GET `/api/admin/classes` | session | classes with rosters |
@@ -61,7 +61,7 @@ WHERE (SELECT cancelled FROM classes WHERE id = ?2) = 0
 Errors are JSON `{ error: { code, message, fields? } }` with accurate status codes. Request bodies are size-capped. Nothing logs names, emails, codes or the passphrase.
 
 ## Authentication and authorisation
-- Visitors have no accounts. A cancellation code (128-bit random, shown once, only its SHA-256 stored) authorises one booking.
+- Visitors have no accounts. A cancellation code (75 bits of randomness from a 32-letter alphabet without look-alikes, shown once, only its SHA-256 stored; guessing is bounded by rate limiting) authorises one booking.
 - Admin: `ADMIN_PASSPHRASE` and `SESSION_SECRET` are Worker secrets. Login compares in constant time and sets an HMAC-signed, expiring (8 h), `HttpOnly; Secure; SameSite=Strict` cookie. Every admin handler calls one `requireAdmin()` guard; a test enumerates the route table and asserts 401 for each without a session. State-changing admin calls also require the cookie plus a custom header (CSRF defence in addition to SameSite).
 - Rate limiting: per-IP counters in D1 (`CF-Connecting-IP`), fixed windows; sign-in is stricter than booking.
 
@@ -92,3 +92,15 @@ Over the daily limit D1 returns errors and Workers return error 1027, so the fro
 ## Known unknowns to resolve before Gate C
 1. Exactly how the D1 binding is attached to a direct-upload Pages project from the CLI (wrangler.toml with `pages_build_output_dir` versus dashboard binding). Verified against current wrangler documentation and a local run before any production change.
 2. Measured CPU time per request against the 10 ms limit.
+
+## Decisions made while building (deviations from the approved plan)
+1. **Calendar file is built in the browser** (`shared/ics.ts`), not by a server endpoint. The class details are already on the confirmation screen, so no extra request, no extra attack surface, and the file contains no personal data. The planned `GET /api/bookings/:id/ics` was dropped.
+2. **Cancellation code is 75 bits, not 128.** Fifteen characters from a 32-letter alphabet is short enough to type from a screenshot or read aloud, and the cancel endpoint is rate limited and scoped to one class. The code is never stored, only its hash.
+3. **`GET /api/admin/session` was added.** Asking "am I signed in?" by calling an owner endpoint that answers 401 produced a console error on every visit to the sign-in page, found by the browser-hygiene test.
+4. **No Tailwind.** The approved design is plain CSS ported from the prototype, so there are no utility-class name collisions of the kind that broke Focus Board's progress ring.
+5. **Deterministic ordering.** Rosters are ordered by insertion (`rowid`) and classes by start, title, id; ties on a random id made order vary between runs (found by a flaky test).
+6. **The static `_headers` rules apply to the site, not to API responses** (that is how Cloudflare Pages works), so the API handler sets its own `Cache-Control` and `X-Content-Type-Options`.
+7. **Pages answers unknown paths, including missing assets, with the app shell** (status 200); the local server answers 404. Tests assert only that a missing script is never served as script.
+
+## How the D1 risk (R8) was checked
+All SQL runs unchanged on Node's SQLite and on Cloudflare's runtime. `wrangler pages dev` (the real Pages Functions runtime, workerd, with a local D1) was run against the built site: all 41 end-to-end tests pass in Chrome, Firefox and WebKit, and 30 simultaneous bookings for 5 seats produced exactly 5 successes, three times. **Not yet verified:** the production D1 service itself and measured CPU time against the 10 ms limit; both need a deployment.

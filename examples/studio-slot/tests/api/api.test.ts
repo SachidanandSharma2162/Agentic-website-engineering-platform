@@ -237,6 +237,29 @@ describe("owner authentication and authorisation (AC8)", () => {
     expect((await t.call("GET", "/api/admin/classes", undefined, { cookie: a.cookie })).status).toBe(200);
   });
 
+  it("the session probe answers 200 with signedIn true only for a valid cookie, and never with a 401", async () => {
+    const t = makeApp();
+    const none = await t.call("GET", "/api/admin/session");
+    expect([none.status, none.body]).toEqual([200, { signedIn: false }]);
+
+    const a = await t.admin();
+    expect((await t.call("GET", "/api/admin/session", undefined, { cookie: a.cookie })).body).toEqual({ signedIn: true });
+
+    const [name, token] = a.cookie.split("=") as [string, string];
+    const forged = `${name}=${token.slice(0, -3)}AAA`;
+    for (const cookie of [forged, `${name}=garbage`]) {
+      const r = await t.call("GET", "/api/admin/session", undefined, { cookie });
+      expect([r.status, r.body]).toEqual([200, { signedIn: false }]);
+    }
+    t.clock.t += 9 * HOUR; // expired
+    expect((await t.call("GET", "/api/admin/session", undefined, { cookie: a.cookie })).body).toEqual({ signedIn: false });
+  });
+
+  it("the session probe reports signedIn false, not an error, when the owner area is not configured", async () => {
+    const r = await makeApp({ env: { ADMIN_PASSPHRASE: "" } }).call("GET", "/api/admin/session");
+    expect([r.status, r.body]).toEqual([200, { signedIn: false }]);
+  });
+
   it("signing out ends the session cookie", async () => {
     const t = makeApp();
     const a = await t.admin();

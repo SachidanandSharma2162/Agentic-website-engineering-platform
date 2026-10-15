@@ -3,7 +3,7 @@ import { CancelInput } from "../../shared/schema.ts";
 import { dayLabel, formatTime } from "../../shared/time.ts";
 import { api, ApiError, isAbort } from "../api.ts";
 import { useLoad } from "../hooks.ts";
-import { Field, focusFirstInvalid, SelectField } from "../ui/Field.tsx";
+import { Field, useFocusInvalid, SelectField } from "../ui/Field.tsx";
 import { Notice, ProblemNotice } from "../ui/Notice.tsx";
 
 const loadClasses = (signal: AbortSignal) => api.classes(signal);
@@ -15,6 +15,7 @@ export function CancelPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const form = useRef<HTMLFormElement>(null);
+  const focusInvalid = useFocusInvalid(form);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +26,7 @@ export function CancelPage() {
     setProblem(null);
     if (!parsed.success) {
       setFields({ code: parsed.error.issues[0]?.message ?? "Please enter your code." });
-      focusFirstInvalid(form.current);
+      focusInvalid();
       return;
     }
     setFields({});
@@ -39,7 +40,7 @@ export function CancelPage() {
       if (isAbort(err)) return;
       if (err instanceof ApiError && err.code === "not_found") {
         setFields({ code: err.message });
-        focusFirstInvalid(form.current);
+        focusInvalid();
       } else if (err instanceof ApiError && err.code === "class_started") setProblem(err);
       else setProblem(err);
     } finally {

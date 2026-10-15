@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from "react";
+import { useEffect, useId, useState, type InputHTMLAttributes, type ReactNode, type RefObject } from "react";
 
 /** A labelled input with its error message. The error is tied to the input (aria-describedby) but is not part of its name. */
 export function Field({ label, error, children, ...input }: { label: string; error?: string | undefined; children?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
@@ -30,7 +30,15 @@ export function SelectField({ label, error, children, ...select }: { label: stri
   );
 }
 
-/** Move keyboard focus to the first invalid control once React has rendered the errors. */
-export function focusFirstInvalid(form: HTMLFormElement | null): void {
-  requestAnimationFrame(() => form?.querySelector<HTMLElement>("[aria-invalid=true]")?.focus());
+/**
+ * Returns a function that moves keyboard focus to the form's first invalid control. The move happens in an effect, after
+ * React has committed the error state, so aria-invalid is guaranteed to be in the DOM (focusing earlier, for example in
+ * requestAnimationFrame, sometimes ran before the render and focus went nowhere).
+ */
+export function useFocusInvalid(form: RefObject<HTMLFormElement | null>): () => void {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (tick > 0) form.current?.querySelector<HTMLElement>("[aria-invalid=true]")?.focus();
+  }, [tick, form]);
+  return () => setTick((t) => t + 1);
 }

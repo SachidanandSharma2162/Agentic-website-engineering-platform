@@ -6,7 +6,7 @@ import { api, ApiError, isAbort } from "../api.ts";
 import { useLoad } from "../hooks.ts";
 import { rememberBooking } from "../lastBooking.ts";
 import { Badge } from "../ui/ClassBits.tsx";
-import { Field, focusFirstInvalid } from "../ui/Field.tsx";
+import { Field, useFocusInvalid } from "../ui/Field.tsx";
 import { Notice, ProblemNotice } from "../ui/Notice.tsx";
 import { NotFound } from "./NotFound.tsx";
 
@@ -63,6 +63,7 @@ function BookingForm({ classId, studioTimezone }: { classId: string; studioTimez
   const [full, setFull] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const form = useRef<HTMLFormElement>(null);
+  const focusInvalid = useFocusInvalid(form);
   const privacyId = useId();
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
@@ -77,7 +78,7 @@ function BookingForm({ classId, studioTimezone }: { classId: string; studioTimez
       for (const issue of parsed.error.issues) next[String(issue.path[0])] ??= issue.message;
       setFields(next);
       setProblem(null);
-      focusFirstInvalid(form.current);
+      focusInvalid();
       return;
     }
     setFields({});

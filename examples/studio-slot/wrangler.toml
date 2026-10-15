@@ -1,0 +1,14 @@
+name = "studio-slot"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "dist"
+
+# The D1 database. The id below is a placeholder used for local development only: `wrangler pages dev` runs a local copy
+# in .wrangler/ and never contacts Cloudflare. Creating the real production database is a Gate E action (see docs/deployment.md).
+[[d1_databases]]
+binding = "DB"
+database_name = "studio-slot-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[vars]
+STUDIO_TIMEZONE = "Asia/Kolkata"
