@@ -18,7 +18,7 @@ jobs:
       - run: npm test
       - run: npm audit --audit-level=high
   focus-board:
-    # Written but never run: there is no remote yet. Treat as unverified until it has passed once.
+    # Runs the full E2E suite in Chromium, Firefox and WebKit: a CSP problem first showed up in Firefox only.
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -37,6 +37,6 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e:all
       - run: npm audit --audit-level=high

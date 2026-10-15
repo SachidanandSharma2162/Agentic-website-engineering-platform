@@ -1,4 +1,4 @@
-# Weekly dependency update PRs. Written but not yet exercised: it only runs once the repository is on GitHub with Dependabot enabled.
+# Weekly dependency update PRs.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -9,6 +9,11 @@ updates:
     directory: /examples/focus-board
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 fails `npm ci` here: typescript-eslint's peer range does not include it yet (PR #6 failed at install).
+      # Remove this rule once typescript-eslint supports TypeScript 7.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
