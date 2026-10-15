@@ -101,6 +101,7 @@ async function cmdRun(args: ReturnType<typeof parseArgs>): Promise<void> {
   const git = new GitTool(new CommandRunner({ projectRoot: REPO_ROOT }));
   const orch = new Orchestrator({
     store,
+    retryMode: "per-run", // a failed check pauses the run so the operator can repair it before the next attempt
     executors: createExecutors({ providers: { "cloudflare-pages": new CloudflarePagesProvider() }, dryRun: args.flags["dry-run"] === true }),
     onCheckpoint: async (_p, task) => {
       await git.checkpoint(`${project.id}-${task.id}`);
@@ -115,6 +116,10 @@ async function cmdRun(args: ReturnType<typeof parseArgs>): Promise<void> {
   console.log(`  completed this run : ${summary.completed.join(", ") || "-"}`);
   for (const n of summary.needsApproval) console.log(`  needs approval     : ${n.taskId} (gate ${n.gates.join(", ")}) -> sdlc approve ${id} ${n.gates[0]} --by <you>`);
   for (const w of summary.waiting) console.log(`  waiting on operator: ${w.taskId}: ${w.message}`);
+  for (const r of summary.retrying) {
+    const detail = redact(r.error).split("\n").slice(0, 12).join("\n    ");
+    console.log(`  FAILED, repair needed: ${r.taskId} (retry ${r.attempt} of ${r.maxRetries} used) -> fix the cause, then: sdlc run ${id}\n    ${detail}`);
+  }
   for (const b of summary.blocked) console.log(`  BLOCKED            : ${b.taskId}: ${redact(b.reason).split("\n")[0]}`);
   if (summary.unreachable.length) console.log(`  unreachable        : ${summary.unreachable.join(", ")}`);
   if (summary.cancelled) console.log("  cancelled by user; interrupted task returned to READY");

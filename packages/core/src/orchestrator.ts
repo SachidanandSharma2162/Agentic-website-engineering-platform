@@ -29,6 +29,13 @@ export interface OrchestratorOptions {
   executors: Record<string, Executor>;
   /** Called before tasks flagged `checkpoint`. If it throws, the task is not run. */
   onCheckpoint?: (project: Project, task: Task) => Promise<void>;
+  /**
+   * What happens after a retryable failure.
+   * "immediate" (default): the task is re-run straight away within the same run, which suits transient failures.
+   * "per-run": the run stops for that task and reports it in `retrying`, so an operator can repair the cause before the
+   * next run. Each run then consumes at most one retry per task, and the retry budget still bounds total attempts.
+   */
+  retryMode?: "immediate" | "per-run";
 }
 
 export interface RunSummary {
@@ -36,6 +43,8 @@ export interface RunSummary {
   needsApproval: { taskId: string; gates: string[] }[];
   waiting: { taskId: string; message: string }[];
   blocked: { taskId: string; reason: string }[];
+  /** Per-run mode only: tasks that failed this run and still have retry budget; repair, then run again. */
+  retrying: { taskId: string; attempt: number; maxRetries: number; error: string }[];
   unreachable: string[];
   cancelled: boolean;
   /** True only when every task is COMPLETED. */
@@ -46,11 +55,13 @@ export class Orchestrator {
   readonly store: StateStore;
   private executors: Record<string, Executor>;
   private onCheckpoint: OrchestratorOptions["onCheckpoint"];
+  private retryMode: NonNullable<OrchestratorOptions["retryMode"]>;
 
   constructor(opts: OrchestratorOptions) {
     this.store = opts.store;
     this.executors = opts.executors;
     this.onCheckpoint = opts.onCheckpoint;
+    this.retryMode = opts.retryMode ?? "immediate";
   }
 
   /** Persist a task graph (validated). Existing tasks with the same id are left untouched. */
@@ -84,6 +95,7 @@ export class Orchestrator {
     const completed: string[] = [];
     const skippedThisRun = new Set<string>();
     const waiting = new Map<string, string>();
+    const retrying = new Set<string>();
     let cancelled = false;
 
     for (;;) {
@@ -114,6 +126,10 @@ export class Orchestrator {
           waiting.set(task.id, t.blockedReason ?? "waiting for operator");
           skippedThisRun.add(task.id);
         }
+        if (outcome === "retry" && this.retryMode === "per-run") {
+          retrying.add(task.id);
+          skippedThisRun.add(task.id);
+        }
         if (outcome === "cancelled") cancelled = true;
         ran = true;
         break; // re-evaluate the graph after every task
@@ -131,6 +147,9 @@ export class Orchestrator {
       blocked: finalTasks
         .filter((t) => t.status === "BLOCKED" || t.status === "FAILED")
         .map((t) => ({ taskId: t.id, reason: t.lastError ?? t.blockedReason ?? "unknown" })),
+      retrying: finalTasks
+        .filter((t) => retrying.has(t.id) && t.status === "READY")
+        .map((t) => ({ taskId: t.id, attempt: t.retryCount, maxRetries: t.maxRetries, error: t.lastError ?? "unknown" })),
       unreachable: unreachable(finalTasks).map((t) => t.id),
       cancelled,
       done: finalTasks.length > 0 && finalTasks.every((t) => t.status === "COMPLETED"),

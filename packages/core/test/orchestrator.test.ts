@@ -8,14 +8,14 @@ const mk = (id: string, extra: Partial<Task> = {}): Task =>
 let store: StateStore;
 const ok: Executor = async () => ({ ok: true });
 
-function setup(executors: Record<string, Executor>, tasks: Task[]) {
+function setup(executors: Record<string, Executor>, tasks: Task[], retryMode?: "immediate" | "per-run") {
   store = new StateStore(":memory:");
   const now = new Date().toISOString();
   store.saveProject({
     id: PID, name: "t", request: "r", category: "x", complexity: "small", phase: "DISCOVERY",
     workDir: process.cwd(), approvedScope: "", deployments: [], risks: [], createdAt: now, updatedAt: now,
   });
-  const orch = new Orchestrator({ store, executors });
+  const orch = new Orchestrator({ store, executors, retryMode });
   orch.addTasks(PID, tasks);
   return orch;
 }
@@ -86,6 +86,40 @@ describe("retries, blocking, waiting, timeouts", () => {
     const s = await orch.run(PID);
     expect(s.done).toBe(true);
     expect(calls).toBe(2);
+  });
+
+  it("per-run mode stops after one failed attempt so an operator can repair, then continues on the next run", async () => {
+    let calls = 0;
+    let repaired = false;
+    const orch = setup({ ok: async () => (calls++, repaired ? { ok: true } : { ok: false, error: "assertion failed" }) }, [mk("t", { maxRetries: 2 }), mk("after", { dependsOn: ["t"] })], "per-run");
+
+    const first = await orch.run(PID);
+    expect(calls).toBe(1); // no immediate re-run
+    expect(first.done).toBe(false);
+    expect(first.retrying).toEqual([{ taskId: "t", attempt: 1, maxRetries: 2, error: "assertion failed" }]);
+    expect(first.blocked).toEqual([]);
+    expect(store.getTask(PID, "t")).toMatchObject({ status: "READY", retryCount: 1 });
+    expect(store.getTask(PID, "after")?.status).not.toBe("COMPLETED");
+
+    repaired = true; // the operator fixes the cause between runs
+    const second = await orch.run(PID);
+    expect(second.done).toBe(true);
+    expect(second.retrying).toEqual([]);
+    expect(calls).toBe(3); // failed once, then t and after succeeded
+  });
+
+  it("per-run mode still bounds total attempts: the budget is spent across runs, then the task BLOCKS", async () => {
+    let calls = 0;
+    const orch = setup({ ok: async () => (calls++, { ok: false, error: "still broken" }) }, [mk("t", { maxRetries: 2 })], "per-run");
+    expect((await orch.run(PID)).retrying).toHaveLength(1);
+    expect((await orch.run(PID)).retrying).toHaveLength(1);
+    const last = await orch.run(PID);
+    expect(last.retrying).toEqual([]);
+    expect(last.blocked[0]).toMatchObject({ taskId: "t", reason: "still broken" });
+    expect(store.getTask(PID, "t")).toMatchObject({ status: "BLOCKED", retryCount: 3 });
+    expect(calls).toBe(3);
+    await orch.run(PID);
+    expect(calls).toBe(3); // a BLOCKED task is never silently re-run
   });
 
   it("non-retryable failures block immediately", async () => {
