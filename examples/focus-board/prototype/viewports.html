@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus Board viewport review</title>
+<style>
+body{margin:0;padding:24px;font:16px/1.4 system-ui,sans-serif;background:#2a2722;color:#f5efe3}
+h1{font-size:1.1rem;margin:0 0 16px}
+.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+figure{margin:0}
+figcaption{margin:0 0 8px;font-weight:600}
+iframe{border:0;background:#fff;display:block;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#report{white-space:pre;font:13px/1.5 ui-monospace,monospace;margin-top:16px}
+</style>
+</head>
+<body>
+<h1>Focus Board prototype at 375, 768 and 1280 px (route chosen with ?r=tasks, ?r=habits, ?r=settings)</h1>
+<div class="row" id="row"></div>
+<div id="report" data-done="false"></div>
+<script>
+const r = new URLSearchParams(location.search).get("r") || "";
+const sizes = [[375,780,"mobile"],[768,780,"tablet"],[1280,780,"desktop"]];
+const row = document.getElementById("row");
+const frames = sizes.map(([w,h,n]) => {
+  const f = document.createElement("figure");
+  f.innerHTML = `<figcaption>${n} ${w}px</figcaption><iframe width="${w}" height="${h}" title="${n}" src="index.html#/${r}"></iframe>`;
+  row.append(f); return [n, w, f.querySelector("iframe")];
+});
+setTimeout(() => {
+  const lines = frames.map(([n, w, fr]) => {
+    try {
+      const d = fr.contentDocument.documentElement;
+      const wide = [...fr.contentDocument.querySelectorAll("body *")].filter(e => e.getBoundingClientRect().right > w + 0.5 && getComputedStyle(e).position !== "fixed");
+      return `${n} ${w}px route=/${r}: scrollWidth=${d.scrollWidth} clientWidth=${d.clientWidth} overflow=${d.scrollWidth > d.clientWidth} offenders=${wide.length}${wide.slice(0,3).map(e => " " + e.tagName + "." + e.className).join("")}`;
+    } catch (e) { return `${n}: cannot inspect (${e.message})`; }
+  });
+  const rep = document.getElementById("report"); rep.textContent = lines.join("\n"); rep.dataset.done = "true";
+}, 1200);
+</script>
+</body>
+</html>
