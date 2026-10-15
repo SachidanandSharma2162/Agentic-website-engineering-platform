@@ -5,7 +5,7 @@ Verified by: U = unit, API = API/integration test against a real SQLite database
 | ID | Feature | Criterion | Verified by |
 |---|---|---|---|
 | AC1 | F1 | The schedule lists classes for the next 14 days in start order with spots left; cancelled and full classes are labelled; an empty week shows an empty state. | API, C, E |
-| AC2 | F1 | Times display in the studio timezone, with the visitor's local time when it differs, correctly across spring-forward and fall-back dates. | U (table-driven), E |
+| AC2 | F1 | Times display in the studio timezone (`Asia/Kolkata`, a +5:30 offset), with the visitor's local time when it differs; day grouping uses the studio zone; helpers are also correct for `America/New_York` across both DST transitions and for `UTC`. | U (table-driven, three zones), E |
 | AC3 | F2 | A valid booking returns 201 with a cancellation code; the spot count drops by one. Invalid name or email returns field-level 400 errors and changes nothing. | API, C, E |
 | AC4 | F2 | **Capacity is never exceeded**: N concurrent booking requests for a class with M spots (N > M) produce exactly M successes and N-M "full" responses. | API (concurrent) |
 | AC5 | F2 | The same email cannot book the same class twice (409). Booking a full, cancelled or past class is rejected with a specific error. | API, E |

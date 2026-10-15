@@ -43,7 +43,8 @@ Future scope (not built): visitor accounts, payments, confirmation and reminder 
 - Any later addition of outgoing email (messages real users) or payments (money).
 
 ## Assumptions to confirm at Gate A
-- The studio's IANA timezone. **Needed from you**; tests use America/New_York because it has DST, production uses your value.
+All approved at Gate A (2026-10-16), with the studio timezone set by the owner:
+- **Studio timezone: `Asia/Kolkata`** (UTC+5:30, no daylight saving). It is configuration, not hard-coded. Tests also run with `America/New_York` (has DST) so the time logic is not accidentally correct only for a zone without DST, and with a half-hour offset zone (Kolkata) so it is not correct only for whole-hour offsets.
 - Visitors do not need accounts; a cancellation code is enough.
 - No confirmation email in the MVP (the on-screen confirmation and .ics file replace it).
 - One owner, one shared admin passphrase.

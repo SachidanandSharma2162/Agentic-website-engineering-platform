@@ -66,7 +66,7 @@ Errors are JSON `{ error: { code, message, fields? } }` with accurate status cod
 - Rate limiting: per-IP counters in D1 (`CF-Connecting-IP`), fixed windows; sign-in is stricter than booking.
 
 ## Time
-Instants are stored as UTC epoch seconds. The studio's IANA timezone is configuration. Display uses `Intl.DateTimeFormat` with that zone, plus the visitor's local time when different. "Day" grouping on the schedule uses the studio zone. Tests run in a DST timezone and cover both transitions.
+Instants are stored as UTC epoch seconds. The studio's IANA timezone is configuration (`STUDIO_TIMEZONE`, approved value `Asia/Kolkata`, UTC+5:30, no DST). Display uses `Intl.DateTimeFormat` with that zone, plus the visitor's local time when different. "Day" grouping on the schedule uses the studio zone, so a 23:30 IST class stays on its own day for a visitor in UTC. Helpers take the zone as an argument and are tested in three zones: `Asia/Kolkata` (half-hour offset, the production value), `America/New_York` (both DST transitions) and `UTC`.
 
 ## Privacy and retention
 Only name and email are stored. Bookings are purged 90 days after the class by a lazy purge that runs on admin requests (no cron needed); a test advances a clock to prove it.
