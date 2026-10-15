@@ -4,7 +4,10 @@ Date: 2026-10-15. Everything here is backed by files in `docs/evidence/`, the gi
 
 ## Outcome
 
-Focus Board is live at **https://focus-board.pages.dev** (Cloudflare Pages Free, project `focus-board`, production branch `main`). The first deployment's per-deployment URL is `https://365fdff5.focus-board.pages.dev`.
+Focus Board is live at **https://focus-board.pages.dev** (Cloudflare Pages Free, project `focus-board`, production branch `main`). It has been deployed twice:
+
+1. Release candidate 1 (`https://365fdff5.focus-board.pages.dev`). Cross-browser testing later found that this bundle triggered a Content-Security-Policy `eval` report on every page load (a zod probe, caught and harmless to behaviour).
+2. **Release candidate 2 (current, `https://95252136.focus-board.pages.dev`, repository commit `d03060e`)** with the fix. Verified: bundle SHA-256 equals the local build; the platform's stricter smoke test passed (four routes with content checks plus three security headers); the full E2E suite passed on the live site in Chrome, Firefox and WebKit (114 of 114, twice in a row). A first run immediately after the deploy had two failures that did not reproduce (see `docs/evidence/live-verification.json`).
 
 ## Lifecycle against the platform's gates
 

@@ -1,0 +1,7 @@
+{
+  "provider": "cloudflare-pages",
+  "scope": "cloudflare-pages:focus-board",
+  "ok": true,
+  "url": "https://95252136.focus-board.pages.dev",
+  "log": "⛅️ wrangler 4.151.0\n────────────────────\nUploading... (2/4)\nUploading... (3/4)\nUploading... (4/4)\n✨ Success! Uploaded 2 files (2 already uploaded) (2.18 sec)\n\n✨ Uploading _headers\n🌎 Deploying...\n✨ Deployment complete! Take a peek over at https://95252136.focus-board.pages.dev"
+}

@@ -22,7 +22,7 @@ Approved at Gate A (platform plan), scope: milestones 1-6 first; milestones 7-8 
 
 ## Release candidate 2 (Focus Board)
 
-Validated through the platform (117 unit/component tests; 114 E2E runs across Chrome, Firefox and WebKit; 0 audit findings). **It is not deployed**: the live site still serves the first candidate, whose bundle triggers a CSP `eval` report (harmless, caught, but visible in Firefox). Deploying candidate 2 needs fresh Gate C and D approvals (the old ones were revoked by `reopen --new-release`) and a new Cloudflare token.
+Validated through the platform (117 unit/component tests; 114 E2E runs across Chrome, Firefox and WebKit; 0 audit findings) and **deployed** after fresh Gate C and D approvals (the old ones had been revoked by `reopen --new-release`). Live checks: identical bundle hash, stricter smoke test passed, 114 of 114 E2E runs on the live URL twice. The CSP `eval` finding is fixed in production.
 
 ## Not yet verified
 
@@ -30,6 +30,7 @@ Validated through the platform (117 unit/component tests; 114 E2E runs across Ch
 - GitHub Actions workflow (`.github/workflows/ci.yml`): written but never run (no remote).
 - Real Safari on macOS (only Playwright's WebKit build on Windows was run); manual screen-reader testing of the site.
 - GitHub Actions: no run had appeared on GitHub when last checked.
+- Edge propagation: the first E2E run right after a deploy had two failures that did not recur; the cause is assumed, not proven. The platform smoke task has no built-in wait or retry beyond four attempts 5 s apart.
 - A second, structurally different site built end to end (the templates are tested, not proven by a second build).
 - Providers other than Cloudflare Pages.
 - Dependabot (config written, never run).

@@ -1,9 +1,24 @@
 {
-  "url": "https://365fdff5.focus-board.pages.dev",
-  "at": "2026-10-15T18:33:03.126Z",
+  "url": "https://95252136.focus-board.pages.dev",
+  "at": "2026-10-15T19:24:51.933Z",
   "checks": [
     {
       "path": "/",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/tasks",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/habits",
+      "status": 200,
+      "ok": true
+    },
+    {
+      "path": "/settings",
       "status": 200,
       "ok": true
     }

@@ -1,35 +1,66 @@
 {
-  "checkedAt": "2026-10-15T18:33:39.233Z",
-  "productionUrl": "https://focus-board.pages.dev",
-  "deploymentUrl": "https://365fdff5.focus-board.pages.dev",
-  "e2e": {
-    "baseUrl": "https://focus-board.pages.dev",
-    "passed": 37,
-    "failed": 0,
-    "flaky": 0,
-    "skippedScreenshotGenerators": 12,
-    "resultsFileMentionsLocalServer": false
-  },
-  "versionMatch": {
-    "asset": "index-CAymwNvC.js",
-    "localSha256": "9d14ca4a650661651faea17b4324aa227592ee11fb19d8f7d35127a5ff44a8dc",
-    "liveSha256Equal": true,
-    "method": "curl of the live asset piped to sha256sum, compared with dist/"
-  },
-  "headersObserved": [
-    "content-security-policy",
-    "permissions-policy",
-    "referrer-policy",
-    "x-content-type-options"
-  ],
-  "routesHttpStatus": {
-    "/habits": 200,
-    "/tasks": 200,
-    "/settings": 200,
-    "/no/such/page": 200
-  },
-  "notes": [
-    "SPA fallback serves the app shell for unknown paths; the app renders its own not-found page.",
-    "A missing /assets/* file also returns the app shell with HTTP 200 (Cloudflare SPA fallback); harmless but not a 404."
+  "releases": [
+    {
+      "candidate": "1 (c0ae3ff + adapter fix)",
+      "checkedAt": "2026-10-15T18:33:39.233Z",
+      "productionUrl": "https://focus-board.pages.dev",
+      "deploymentUrl": "https://365fdff5.focus-board.pages.dev",
+      "e2e": {
+        "baseUrl": "https://focus-board.pages.dev",
+        "passed": 37,
+        "failed": 0,
+        "flaky": 0,
+        "skippedScreenshotGenerators": 12,
+        "resultsFileMentionsLocalServer": false
+      },
+      "versionMatch": {
+        "asset": "index-CAymwNvC.js",
+        "localSha256": "9d14ca4a650661651faea17b4324aa227592ee11fb19d8f7d35127a5ff44a8dc",
+        "liveSha256Equal": true,
+        "method": "curl of the live asset piped to sha256sum, compared with dist/"
+      },
+      "headersObserved": [
+        "content-security-policy",
+        "permissions-policy",
+        "referrer-policy",
+        "x-content-type-options"
+      ],
+      "routesHttpStatus": {
+        "/habits": 200,
+        "/tasks": 200,
+        "/settings": 200,
+        "/no/such/page": 200
+      },
+      "notes": [
+        "SPA fallback serves the app shell for unknown paths; the app renders its own not-found page.",
+        "A missing /assets/* file also returns the app shell with HTTP 200 (Cloudflare SPA fallback); harmless but not a 404."
+      ],
+      "note": "superseded by candidate 2; kept for the record"
+    },
+    {
+      "candidate": "2 (d03060e)",
+      "deploymentUrl": "https://95252136.focus-board.pages.dev",
+      "productionUrl": "https://focus-board.pages.dev",
+      "bundle": {
+        "asset": "index-D1wSnU4l.js",
+        "localSha256": "64e708872473f2142ecc6dff223bd4589ae38123bcb0632d5b907735f23f63c1",
+        "liveSha256Equal": true
+      },
+      "platformSmoke": "checks / /tasks /habits /settings (200 and body contains 'Focus Board') plus content-security-policy, x-content-type-options, referrer-policy headers: all passed (docs/evidence/smoke.json)",
+      "crossBrowserE2eOnLive": {
+        "browsers": [
+          "chrome",
+          "firefox",
+          "webkit"
+        ],
+        "finalTwoRuns": {
+          "passed": 114,
+          "failed": 0,
+          "skippedScreenshotGenerators": 36
+        },
+        "runs": 2
+      },
+      "firstRunAfterDeploy": "2 failures: Chrome saw one CSP eval violation on the first page load, and one Firefox test timed out. Neither reproduced in three later runs or in a debug capture of violation details. Believed to be edge propagation right after the deploy; not proven."
+    }
   ]
 }
