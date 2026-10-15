@@ -3,7 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GATES, GATE_DESCRIPTIONS, Orchestrator, StateStore, type GateId, type Project } from "@sdlc/core";
 import { CloudflarePagesProvider } from "@sdlc/providers";
-import { classifyRequest, createExecutors, slugify, standardWebsiteTasks } from "@sdlc/roles";
+import { MODULES, TEMPLATES, classifyRequest, createExecutors, selectModules, slugify, standardWebsiteTasks, templateFor } from "@sdlc/roles";
 import { CommandRunner, GitTool, isInside, redact } from "@sdlc/tools";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -45,6 +45,7 @@ const USAGE = `sdlc: agentic website engineering platform
   approve <project> <gate> --by <who> [--scope <s>] [--note <n>]
   reject  <project> <gate> --by <who> [--scope <s>] [--note <n>]
   projects                            list projects
+  templates                           list category templates and feature modules
   gates                               explain gates A-E
 
 Approvals must come from a human decision. Gates: ${GATES.join(", ")}.`;
@@ -81,13 +82,20 @@ async function cmdInit(args: ReturnType<typeof parseArgs>): Promise<void> {
     workDir, approvedScope: "", deployments: [], risks: [], createdAt: now, updatedAt: now,
   };
   store.saveProject(project);
+  const tpl = templateFor(c.category);
+  const sel = selectModules(request, tpl);
+  const needsBackend = tpl.architecture.backend || sel.capabilities.includes("backend");
   const orch = new Orchestrator({ store, executors: {} });
   orch.addTasks(slug, standardWebsiteTasks({
     projectId: slug, deployScope: provider.scopeFor(deployName), deployProvider: provider.id, deployProjectName: deployName,
+    backend: needsBackend,
   }));
   store.appendEvent({ projectId: slug, type: "project.created", data: { category: c.category, complexity: c.complexity, signals: c.signals } });
   console.log(`Created project "${slug}" in ${workDir}`);
   console.log(`  category: ${c.category}, complexity: ${c.complexity}${c.signals.length ? ` (signals: ${c.signals.join(", ")})` : ""}`);
+  console.log(`  template: ${tpl.category}; MVP modules: ${[...sel.mvp, ...sel.requested].map((x) => x.id).join(", ") || "none"}`);
+  console.log(`  backend task: ${needsBackend ? "yes" : "no"}; capabilities: ${sel.capabilities.join(", ") || "none"}`);
+  for (const g of sel.gateE) console.log(`  Gate E will be needed for ${g.module}: ${g.reason}`);
   console.log(`  deploy scope: ${provider.scopeFor(deployName)}`);
   console.log(`Next: sdlc run ${slug}`);
   store.close();
@@ -196,6 +204,12 @@ async function main(): Promise<void> {
       s.close();
       return;
     }
+    case "templates":
+      for (const t of Object.values(TEMPLATES)) console.log(`${t.category.padEnd(15)} mvp: ${t.mvp.join(", ")}${t.architecture.backend ? "  [backend]" : ""}`);
+      console.log("");
+      console.log("Modules:");
+      for (const x of Object.values(MODULES)) console.log(`  ${x.id.padEnd(20)} ${x.title}${x.gateE ? "  [Gate E]" : ""}`);
+      return;
     case "gates":
       for (const g of GATES) console.log(`  ${g}  ${GATE_DESCRIPTIONS[g]}`);
       return;

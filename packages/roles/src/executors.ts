@@ -22,7 +22,7 @@ interface CheckCommand {
   args: string[];
 }
 
-const ANSI = /[[0-9;]*m/g;
+const ANSI = /\u001b\[[0-9;]*m/g;
 const tail = (s: string, n = 3000) => {
   const clean = s.replace(ANSI, "");
   return clean.length > n ? "…" + clean.slice(-n) : clean;
@@ -196,24 +196,36 @@ export function createExecutors(deps: ExecutorDeps): Record<string, Executor> {
       if (!dep?.url) return { ok: false, retryable: false, error: "no recorded deployment URL to verify" };
 
       const doFetch = deps.fetchFn ?? fetch;
-      const paths = (task.params.paths as string[] | undefined) ?? ["/"];
-      const contains = task.params.contains as string | undefined;
-      const checks: { path: string; status: number | null; ok: boolean; note?: string }[] = [];
-      for (const path of paths) {
-        const url = new URL(path, dep.url).toString();
-        let last: { status: number | null; ok: boolean; note?: string } = { status: null, ok: false, note: "no response" };
+      // New form: params.checks = [{ path, status?, contains? }] and params.requireHeaders. Old form: params.paths + params.contains.
+      const legacyContains = task.params.contains as string | undefined;
+      const checkSpecs: { path: string; status?: number; contains?: string }[] =
+        (task.params.checks as { path: string; status?: number; contains?: string }[] | undefined) ??
+        ((task.params.paths as string[] | undefined) ?? ["/"]).map((path) => ({ path, contains: legacyContains }));
+      const requireHeaders = ((task.params.requireHeaders as string[] | undefined) ?? []).map((h) => h.toLowerCase());
+
+      type Observed = { path: string; status: number | null; ok: boolean; note?: string; missingHeaders?: string[] };
+      const checks: Observed[] = [];
+      for (const spec of checkSpecs) {
+        const url = new URL(spec.path, dep.url).toString();
+        const wantStatus = spec.status ?? 200;
+        const wantHeaders = spec.path === "/" ? requireHeaders : [];
+        let last: Observed = { path: spec.path, status: null, ok: false, note: "no response" };
         for (let attempt = 0; attempt < 4 && !last.ok; attempt++) {
           if (attempt > 0) await new Promise((r) => setTimeout(r, deps.smokeRetryDelayMs ?? 5000));
           try {
             const res = await doFetch(url, { signal: AbortSignal.timeout(15_000), redirect: "follow" });
             const body = await res.text();
-            const hasText = contains === undefined || body.includes(contains);
-            last = { status: res.status, ok: res.status === 200 && hasText, note: hasText ? undefined : `body missing "${contains}"` };
+            const notes: string[] = [];
+            if (res.status !== wantStatus) notes.push(`expected status ${wantStatus}`);
+            if (spec.contains !== undefined && !body.includes(spec.contains)) notes.push(`body missing "${spec.contains}"`);
+            const missingHeaders = wantHeaders.filter((h) => !res.headers.get(h));
+            if (missingHeaders.length) notes.push(`missing headers: ${missingHeaders.join(", ")}`);
+            last = { path: spec.path, status: res.status, ok: notes.length === 0, note: notes.join("; ") || undefined, missingHeaders: missingHeaders.length ? missingHeaders : undefined };
           } catch (e) {
-            last = { status: null, ok: false, note: e instanceof Error ? e.message : String(e) };
+            last = { path: spec.path, status: null, ok: false, note: e instanceof Error ? e.message : String(e) };
           }
         }
-        checks.push({ path, ...last });
+        checks.push(last);
       }
       const ev = writeEvidence(project, "smoke", { url: dep.url, at: new Date().toISOString(), checks });
       if (!checks.every((c) => c.ok)) {

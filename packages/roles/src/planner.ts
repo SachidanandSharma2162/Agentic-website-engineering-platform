@@ -48,7 +48,25 @@ export interface PlanOptions {
   /** Commands the quality task runs. Each runs inside the project directory. */
   qualityCommands?: { name: string; cmd: string; args: string[] }[];
   /** Files each operator-authored task must produce before it can complete. */
-  expect?: Partial<Record<"architecture" | "design" | "implement" | "tests" | "handover", string[]>>;
+  expect?: Partial<Record<"architecture" | "design" | "implement" | "backend" | "tests" | "handover", string[]>>;
+  /** Add a backend task (API, data layer, server-side authorization) that must finish before tests run. */
+  backend?: boolean;
+  /** What the production smoke test checks on the live URL. Defaults to fetching "/" for HTTP 200. */
+  smoke?: SmokeSpec;
+}
+
+export interface SmokeCheck {
+  path: string;
+  /** Expected HTTP status (default 200). */
+  status?: number;
+  /** Text the response body must contain. */
+  contains?: string;
+}
+
+export interface SmokeSpec {
+  checks?: SmokeCheck[];
+  /** Response headers that must be present on "/" (e.g. content-security-policy). Case-insensitive. */
+  requireHeaders?: string[];
 }
 
 const DEFAULT_QUALITY = [
@@ -84,9 +102,18 @@ export function standardWebsiteTasks(o: PlanOptions): Task[] {
       action: "builtin.operator", dependsOn: ["design"], gates: ["A", "B"], checkpoint: true,
       params: { instructions: "Implement the application per the approved plan and design.", expect: expect.implement ?? ["package.json", "src/main.tsx"] },
     }),
+    ...(o.backend
+      ? [
+          t({
+            id: "backend", title: "Implement API, data layer and server-side authorization", phase: "IMPLEMENTATION", role: "backend",
+            action: "builtin.operator", dependsOn: ["design"], gates: ["A", "B"], checkpoint: true,
+            params: { instructions: "Implement the API, validation, authorization on every protected operation, migrations and seed data; document it.", expect: expect.backend ?? ["docs/api.md"] },
+          }),
+        ]
+      : []),
     t({
       id: "tests", title: "Write automated tests from the acceptance criteria", phase: "TESTING", role: "qa",
-      action: "builtin.operator", dependsOn: ["implement"], gates: ["B"],
+      action: "builtin.operator", dependsOn: o.backend ? ["implement", "backend"] : ["implement"], gates: ["B"],
       params: { instructions: "Write unit and end-to-end tests covering every acceptance criterion.", expect: expect.tests ?? ["tests"] },
     }),
     t({
@@ -113,7 +140,7 @@ export function standardWebsiteTasks(o: PlanOptions): Task[] {
     t({
       id: "smoke", title: "Production smoke tests", phase: "DEPLOYMENT", role: "qa",
       action: "builtin.smoke-test", dependsOn: ["deploy"], gates: ["D"], approvalScope: o.deployScope,
-      params: { paths: ["/"] },
+      params: o.smoke ? { checks: o.smoke.checks ?? [{ path: "/" }], requireHeaders: o.smoke.requireHeaders ?? [] } : { paths: ["/"] },
     }),
     t({
       id: "handover", title: "Handover documentation and final report", phase: "HANDOVER", role: "docs",
